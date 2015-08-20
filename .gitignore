@@ -4,3 +4,11 @@ bak
 pkg
 *~
 ~*
+
+src/video/ctm_program_icon.c
+src/video/shaders/ctm_shader_raw.c
+src/video/shaders/ctm_shader_sprite.c
+src/video/shaders/ctm_shader_tex.c
+src/video/shaders/ctm_shader_text.c
+src/video/shaders/ctm_shader_tile.c
+src/test/ctm_test_contents.h

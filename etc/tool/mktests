@@ -1,0 +1,53 @@
+#!/bin/sh
+
+if [ "$#" != 1 ] ; then
+  echo "Usage: $0 OUTPUT"
+  exit 1
+fi
+
+if [ ! -d src ] ; then
+  echo "'src' not found. Please run this script from the project's root."
+  exit 1
+fi
+
+DSTPATH="$1"
+
+mkdir -p mid || exit 1
+TESTLIST=mid/ctm-tests
+echo > $TESTLIST
+
+for SRCPATH in $(find src/test -name '*.c') ; do
+  nl -ba -s' ' $SRCPATH | sed -En 's,^ *([0-9]+) *CTM_UNIT_TEST\(([0-9a-zA-Z_]+)\).*$,'"$SRCPATH"' \1 \2,p' >> $TESTLIST
+done
+
+echo > "$DSTPATH"
+
+cat - >> "$DSTPATH" <<EOF
+#ifndef CTM_TEST_CONTENTS_H
+#define CTM_TEST_CONTENTS_H
+
+EOF
+
+sed -E 's/^([^ ]+) ([^ ]+) ([^ ]*)$/int \3()\;/' $TESTLIST >> "$DSTPATH"
+
+cat - >> "$DSTPATH" <<EOF
+
+struct ctm_test {
+  int (*fn)();
+  const char *name;
+  const char *file;
+  int line;
+};
+
+static const struct ctm_test ctm_testv[]={
+EOF
+
+sed -E 's/^([^ ]+) ([^ ]+) ([^ ]*)$/  {\3,"\3","\1",\2},/' $TESTLIST >> "$DSTPATH"
+
+cat - >> "$DSTPATH" <<EOF
+};
+
+#endif
+EOF
+
+rm $TESTLIST

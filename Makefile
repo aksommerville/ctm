@@ -87,7 +87,7 @@ else ifeq ($(CTM_CONFIG),macos) # ----- MacOS X with SDL (default) -----
   OPT:=sdl
 
   APP:=CampaignTrailOfTheMummy.app/Contents/MacOS/CampaignTrailOfTheMummy
-  POSTTEST:=--fullscreen=1
+  POSTRUN:=--fullscreen=0
 
 else ifeq ($(CTM_CONFIG),macos-glx) # ----- MacOS X with GLX (must request explicitly) -----
 # This is not a great choice of drivers. It's only available because I had to write GLX anyway for Linux.
@@ -132,7 +132,7 @@ else ifeq ($(CTM_CONFIG),mswin-vialinux) # ----- Microsoft Windows, cross-compil
   OPT:=sdl
   
   APPSFX:=.exe
-  POSTTTEST:=& etc/tool/watchstdio
+  POSTRUN:=& etc/tool/watchstdio
 
   CC+=-DGLSLVERSION=130
 
@@ -150,8 +150,8 @@ else ifeq ($(CTM_CONFIG),mswin-viamacos) # ----- Microsoft Windows, cross-compil
   OPT:=sdl
   
   APPSFX:=.exe
-  POSTTTEST:=& etc/tool/watchstdio
-  PRETEST:=wine
+  POSTRUN:=& etc/tool/watchstdio
+  PRERUN:=wine
 
   CC+=-DGLSLVERSION=120
 
@@ -161,13 +161,17 @@ endif
 
 #------------------------------------------------------------------------------
 # Generated source files.
+# These locate under src.
+# Be sure to add them to .gitignore before committing!
 
 GENERATED_FILES:= \
   src/video/ctm_program_icon.c \
-  $(patsubst %.shader,%.c,$(wildcard src/video/shaders/*.shader))
+  $(patsubst %.shader,%.c,$(wildcard src/video/shaders/*.shader)) \
+  src/test/ctm_test_contents.h
 
 src/video/ctm_program_icon.c:etc/tool/mkicon src/video/ctm_program_icon.32x32.rgba;$(PRECMD) $^ $@
 src/video/shaders/%.c:etc/tool/mkshader src/video/shaders/%.shader;$(PRECMD) $^ $@
+src/test/ctm_test_contents.h:etc/tool/mktests $(shell find src/test -name '*.c');$(PRECMD) $< $@
 
 #------------------------------------------------------------------------------
 # Remainder of this file should be fully automatic.
@@ -189,6 +193,11 @@ CFILES+=$(shell find $(addprefix src/opt/,$(OPT)) -name '*.c') $(GENCFILES)
 OFILES:=$(patsubst src/%.c,$(MIDDIR)/%.o,$(CFILES))
 -include $(OFILES:.o=.d)
 
+OFILES_COMMON:=$(filter-out $(MIDDIR)/main/% $(MIDDIR)/editor/% $(MIDDIR)/test/%,$(OFILES))
+OFILES_APP:=$(OFILES_COMMON) $(filter $(MIDDIR)/main/%,$(OFILES))
+OFILES_EDITOR:=$(OFILES_COMMON) $(filter $(MIDDIR)/editor/%,$(OFILES))
+OFILES_TEST:=$(OFILES_COMMON) $(filter $(MIDDIR)/test/%,$(OFILES))
+
 $(MIDDIR)/%.o:src/%.c|$(GENHFILES);$(PRECMD) $(CC) -o $@ $<
 
 ifdef APP
@@ -202,12 +211,20 @@ ifdef EDITOR
 else
   EDITOR:=$(OUTDIR)/ctm-editor$(APPSFX)
 endif
+ifdef TEST
+  TEST:=$(OUTDIR)/$(TEST)
+else
+  TEST:=$(OUTDIR)/ctm-test$(APPSFX)
+endif
 
 all:$(APP)
-$(APP):$(filter-out $(MIDDIR)/editor/%,$(OFILES));$(PRECMD) $(LD) -o $@ $^ $(LDPOST)
+$(APP):$(OFILES_APP);$(PRECMD) $(LD) -o $@ $^ $(LDPOST)
 
 all:$(EDITOR)
-$(EDITOR):$(filter-out $(MIDDIR)/main/%,$(OFILES));$(PRECMD) $(LD) -o $@ $^ $(LDPOST)
+$(EDITOR):$(OFILES_EDITOR);$(PRECMD) $(LD) -o $@ $^ $(LDPOST)
+
+all:$(TEST)
+$(TEST):$(OFILES_TEST);$(PRECMD) $(LD) -o $@ $^ $(LDPOST)
 
 #------------------------------------------------------------------------------
 # Special commands.
@@ -230,8 +247,9 @@ help:; \
   echo "Current configuration: $(CTM_CONFIG)" ; \
   echo ""
 
-test:$(APP);$(PRETEST) $(APP) $(POSTTEST)
+run:$(APP);$(PRERUN) $(APP) $(POSTRUN)
 edit:$(EDITOR);$(EDITOR)
+test:$(TEST);$(TEST)
 
 clean:;rm -rf $(GENERATED_FILES) mid out
 
