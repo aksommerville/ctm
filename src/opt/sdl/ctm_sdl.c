@@ -574,8 +574,14 @@ int ctm_sdl_update() {
     case SDL_MOUSEBUTTONUP: switch (evt.button.button) {
         case SDL_BUTTON_LEFT: ctm_editor_input.ptrleft=evt.button.state?1:0; break;
         case SDL_BUTTON_RIGHT: ctm_editor_input.ptrright=evt.button.state?1:0; break;
-        case SDL_BUTTON_WHEELUP: if (evt.button.state) { if (ctm_sdl.shift) ctm_editor_input.ptrwheelx=-1; else ctm_editor_input.ptrwheely=-1; } break;
-        case SDL_BUTTON_WHEELDOWN: if (evt.button.state) { if (ctm_sdl.shift) ctm_editor_input.ptrwheelx=1; else ctm_editor_input.ptrwheely=1; } break;
+        case SDL_BUTTON_WHEELUP: if (evt.button.state) { 
+            if (ctm_sdl.shift) ctm_editor_input.ptrwheelx=-1; 
+            else ctm_editor_input.ptrwheely=-1;
+          } break;
+        case SDL_BUTTON_WHEELDOWN: if (evt.button.state) {
+            if (ctm_sdl.shift) ctm_editor_input.ptrwheelx=1;
+            else ctm_editor_input.ptrwheely=1;
+          } break;
       } break;
 
     default: break;

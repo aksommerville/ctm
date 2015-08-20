@@ -61,7 +61,7 @@ static int ctm_init() {
   signal(SIGQUIT,ctm_rcvsig);
 
   /* Bring subsystems online. */
-  if (ctm_video_init(1)<0) return -1;
+  if (ctm_video_init(0)<0) return -1;
   if (ctm_poll_init()<0) return -1;
   if (ctm_input_init(1)<0) return -1;
   if (ctm_display_init()<0) return -1;

@@ -61,6 +61,12 @@ int ctm_state_for_cell(int col,int row);
  */
 void ctm_choose_vacant_location(int *x,int *y,int *interior,int stateix,int interior_ok);
 
+/* Nonzero if this location is vacant.
+ * This is the test used by ctm_choose_vacant_location().
+ * OOB cells return FALSE.
+ */
+int ctm_location_is_vacant(int x,int y,int interior);
+
 /* Poll all voters in the named state, or nationwide if out of range.
  * Return seven poll results: One counting everybody, then one for each party.
  * (threshhold) is the degree of certainty a voter must have to count firmly.

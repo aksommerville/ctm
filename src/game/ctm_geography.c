@@ -141,14 +141,17 @@ void ctm_choose_vacant_location(int *x,int *y,int *interior,int stateix,int inte
 
   // Try 100 times to pick a cell entirely at random.
   int panic=100; while (panic-->0) {
-    *x=(xp+rand()%xc);
-    *y=(yp+rand()%yc);
-    int cellp=(*y)*ctm_grid.colc+(*x);
-    *x=*x*CTM_TILESIZE+(CTM_TILESIZE>>1);
-    *y=*y*CTM_TILESIZE+(CTM_TILESIZE>>1);
-    if (!ctm_tileprop_exterior[ctm_grid.cellv[cellp].tile]&&!ctm_location_occupied(&ctm_group_exterior,*x,*y)) { *interior=0; return; }
-    if (interior_ok) {
-      if (!ctm_tileprop_interior[ctm_grid.cellv[cellp].itile]&&!ctm_location_occupied(&ctm_group_interior,*x,*y)) { *interior=1; return; }
+    int col=xp+rand()%xc;
+    int row=yp+rand()%yc;
+    *x=col*CTM_TILESIZE+(CTM_TILESIZE>>1);
+    *y=row*CTM_TILESIZE+(CTM_TILESIZE>>1);
+    if (ctm_location_is_vacant(col,row,0)) {
+      *interior=0;
+      return;
+    }
+    if (interior_ok&&ctm_location_is_vacant(col,row,1)) {
+      *interior=1;
+      return;
     }
   }
 
@@ -169,6 +172,20 @@ void ctm_choose_vacant_location(int *x,int *y,int *interior,int stateix,int inte
   *x=xp+(xc>>1); *x*=CTM_TILESIZE; *x+=CTM_TILESIZE>>1;
   *y=yp+(yc>>1); *y*=CTM_TILESIZE; *y+=CTM_TILESIZE>>1;
   *interior=0;
+}
+
+int ctm_location_is_vacant(int x,int y,int interior) {
+  if ((x<0)||(x>=ctm_grid.colc)) return 0;
+  if ((y<0)||(y>=ctm_grid.rowc)) return 0;
+  int cellp=y*ctm_grid.colc+x;
+  if (interior) {
+    if (ctm_tileprop_interior[ctm_grid.cellv[cellp].itile]) return 0;
+    if (ctm_location_occupied(&ctm_group_interior,x*CTM_TILESIZE+(CTM_TILESIZE>>1),y*CTM_TILESIZE+(CTM_TILESIZE>>1))) return 0;
+  } else {
+    if (ctm_tileprop_exterior[ctm_grid.cellv[cellp].tile]) return 0;
+    if (ctm_location_occupied(&ctm_group_exterior,x*CTM_TILESIZE+(CTM_TILESIZE>>1),y*CTM_TILESIZE+(CTM_TILESIZE>>1))) return 0;
+  }
+  return 1;
 }
 
 /* Conduct poll.
