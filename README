@@ -1,0 +1,134 @@
+The Campaign Trail of the Mummy
+By Andy Sommerville: a k sommerville at g mail dot com
+(c) 2015
+
+LICENSED UNDER GNU GPL VERSION 3
+Share and enjoy.
+For the full license text, please see: https://gnu.org/licenses/gpl.html
+
+CONTENTS
+  1. Installation
+  2. How to Play
+  3. Input Mapping
+  4. Default Keyboard Map
+  5. Known Bugs
+
+=== 1. INSTALLATION ===
+
+From the command line, in the directory containing this README:
+$ make install
+
+This will build everything if necessary, and drop all the files under /usr/local.
+To install somewhere else, edit etc/tool/install, around line 27 ("PFX").
+
+If it doesn't print any error messages, you can now enter "ctm" to play.
+
+In the inconceivably-unlikely event that you should ever want to remove the 
+installed CTM, come back to this directory and enter:
+$ make uninstall
+
+Building and installation has been tested on Raspberry Pi (Raspian) and MacOS (10.10.1).
+It should also work on any desktop Linux distro, but I don't have one set up at the moment for testing.
+There's a chance that it will also work on Windows, with MinGW. I refuse to test this!
+
+=== 2. HOW TO PLAY ===
+
+You are the resurrected mummy of an ancient Egyptian pharoah, and you're running for president of the USA.
+In a multi-player game, you may choose to play against your mates or against the Werewolf.
+One-player games are always against the Werewolf.
+
+Mummies may belong to the Blood Party (red) or the Frostbite Party (blue).
+There's no real difference between parties, except Frostbite starts in Hawaii and Blood in Virginia.
+Every voter has an opinion, and when the time runs out, will cast his vote.
+
+In our crazy version of the United States, there are only 9 states, with equal electorate representation:
+  Alaska (AK), home of white shirts. White like snow!
+  Wisconsin (WI), home of yellow shirts. Yellow like cheese!
+  Vermont (VT), home of green shirts. Green like mountains!
+  California (CA), home of gray shirts.
+  Kansas (KS), home of gray shirts.
+  Virginia (VA), headquarters of the Blood Party and home of red shirts. Red like lovers!
+  Hawaii (HI), headquarters of the Frostbite Party and home of blue shirts. Blue like water!
+  Texas (TX), home of black shirts. Black like oil!
+  Florida (FL), home of gray shirts.
+
+There are seven shirt colors among American voters, and this is the game's only demographic distinction.
+RED and BLUE shirts start off with a bias towards that color party.
+All other colors start off more-or-less neutral.
+
+You can influence the voters' opinions a few different ways:
+    + Stand near them for a little while.
+   ++ Enter their minds as a ghost.
+ ++++ Throw money at them.
+   ++ Kill vermin (cats, racoons, etc) near them.
+  +++ Make a speech where they can hear it.
+   -- Kill humans or mummies near them.
+ ---- Kill enough humans to attract police attention. (statewide)
+
+If you can't change a voter's mind, you can also kill him.
+As in most US elections, dead voters don't vote.
+
+Every state and every color has a radio station.
+In these, you can pay $5 to make a speech which will reach all voters in that state, or wearing that color.
+
+After receiving an opinion shift, a voter is numb for about a second.
+During this time, the voter tints towards the color he shifted towards.
+
+Press PAUSE at any time to view a state-by-state summary, and detailed opinion 
+polls of the state you are in. These polls can lag by a few seconds.
+
+If you kill too many humans too fast, the police may be called.
+Once this happens, the state immediately shifts opinion hard against you, and policemen will appear.
+It's unsafe to remain in a state where you are Wanted.
+
+Each state has a Governor Monster. If you kill it, you get a fabulous prize.
+
+Inside some houses, you will find coins and speeches.
+These are laid out at random when the game begins, and do not reappear.
+
+When all mummies are in the same party, they play against the Werewolf.
+Werewolf controls the press, and he will occasionally print stories favorable to himself.
+These stories can be scoped to a particular state or color, or they may reach everybody.
+Check the newspaper name and read the headline carefully to know the impact.
+
+=== 3. INPUT MAPPING ===
+
+Each detected input device maps to a player.
+(Multiple players per device is not supported).
+
+The game has 8 two-state buttons per player, and 1 global action.
+Each player has 4 directional buttons: UP,DOWN,LEFT,RIGHT
+...and 3 buttons for items: PRIMARY,SECONDARY,TERTIARY
+...and a "PAUSE" button.
+There is also a "QUIT" button, not necessarily associated with a player.
+
+!! BEWARE !!
+Hitting the QUIT button terminates the program immediately.
+
+After installation, the input map is stored at /usr/local/share/ctm/input.cfg
+This is a plain text file, whose format is described therein.
+If an unknown device is detected, CTM will choose a default map and dump its text to the console.
+Copy and paste that text into /usr/local/share/ctm/input.cfg, and modify as needed.
+
+=== 4. DEFAULT KEYBOARD MAP ===
+
+For SDL and X11 builds (ie desktop PCs), this can't be changed. I'll get around to that eventually.
+For Raspberry Pi, this is only the default and can be modified any time CTM is not running.
+
+ESC     => QUIT
+ENTER   => PAUSE
+SPACE   => PAUSE
+H,J,K,L => LEFT,DOWN,UP,RIGHT (like vim!)
+Z,X,C   => PRIMARY,SECONDARY,TERTIARY
+ARROWS  => UP,DOWN,LEFT,RIGHT
+
+Numeric Keypad:
+8,4,6,5,2   => UP,LEFT,RIGHT,DOWN,DOWN
+0,DOT,ENTER => PRIMARY,SECONDARY,TERTIARY
+
+=== 5. KNOWN BUGS ===
+
+- It is possible though unlikely for players to spawn in unreachable places.
+- Keyboard input is not configurable for SDL and X11 drivers.
+
+If you notice any other bugs, please let me know: a k sommerville at g mail dot com

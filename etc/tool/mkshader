@@ -1,0 +1,67 @@
+#!/usr/bin/env python
+import sys,os
+
+if len(sys.argv)!=3:
+  sys.stderr.write("Usage: %s INPUT OUTPUT\n"%(sys.argv[0]))
+  sys.exit(1)
+
+SRCPATH=sys.argv[1]
+DSTPATH=sys.argv[2]
+
+name=os.path.basename(DSTPATH).split('.')[0]
+if not name.startswith("ctm_shader_"):
+  sys.stderr.write("%s: Expected base name beginning 'ctm_shader_'.\n"%(DSTPATH))
+  sys.exit(1)
+name=name[11:]
+
+common="uniform vec2 screensize;\nuniform vec2 tilesize;\n"
+vsrc=""
+fsrc=""
+phase=0
+for lineno,line in enumerate(open(SRCPATH,'r'),1):
+  cmtp=line.find("//")
+  if cmtp>=0: line=line[:cmtp]
+  line=line.strip()
+  if not len(line): continue
+  if line=="BEGIN VERTEX SHADER":
+    phase=1
+  elif line=="BEGIN FRAGMENT SHADER":
+    phase=2
+  elif phase==0:
+    common+=line+"\n"
+  elif phase==1:
+    vsrc+=line+"\n"
+  elif phase==2:
+    fsrc+=line+"\n"
+vsrc=common+vsrc
+fsrc=common+fsrc
+
+def stringify_text(src):
+  dst="\""
+  linelen=0
+  for ch in src:
+    if ch=='\n':
+      dst+="\\n\"\n\""
+      linelen=0
+    else:
+      dst+=ch
+      linelen+=1
+      if linelen>=100:
+        dst+="\"\n\""
+        linelen=0
+  dst+="\",\n"
+  return dst
+
+dst="#include \"video/ctm_video_internal.h\"\n"
+dst+="struct ctm_shader ctm_shader_%s={\n"%(name)
+dst+="  .vsrc=\n"
+dst+=stringify_text(vsrc)
+dst+="  .vsrcc=%d,\n"%(len(vsrc))
+dst+="  .fsrc=\n"
+dst+=stringify_text(fsrc)
+dst+="  .fsrcc=%d,\n"%(len(fsrc))
+dst+="  .name=\"%s\",\n"%(name)
+dst+="  .vtxsize=sizeof(struct ctm_vertex_%s),\n"%(name)
+dst+="};\n"
+
+open(DSTPATH,'w').write(dst)

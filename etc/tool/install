@@ -1,0 +1,38 @@
+#!/bin/sh
+
+# Define this empty if you don't want to run each instruction through 'sudo'.
+SUDO=sudo
+
+# It's a slightly different process for the Mac...
+if [ "$CTM_CONFIG" = macos ] ; then
+  APPBASE="$(echo $APP | sed 's,^.*/\([^/]*\.app\)/.*$,\1,')"
+  if [ -z "$APPBASE" ] ; then
+    echo "Failed to extract '.app' component from application path '$APP'"
+    exit 1
+  fi
+  DST="/Applications/$APPBASE"
+  if [ -e "$DST" ] ; then
+    echo "$DST already exists. Please 'make uninstall' first."
+    exit 1
+  fi
+  SRC="out/$CTM_CONFIG/$APPBASE"
+  $SUDO cp -r "$SRC" "$DST" || exit 1
+  $SUDO cp -r ctm-data "$DST/Contents/Resources" || exit 1
+  $SUDO cp etc/Info.plist "$DST/Contents" || exit 1
+  $SUDO cp etc/ctm.icns "$DST/Contents/Resources/ctm.icns" || exit 1
+  echo "Installed in /Applications. The installed bundle is entirely self-contained."
+
+# Most systems...
+else
+  PFX=/usr/local
+  APPDST="$PFX/bin/ctm"
+  DATADST="$PFX/share/ctm"
+  if [ -e "$APPDST" ] || [ -e "$DATADST" ] ; then
+    echo "Previous installation detected. Please 'make uninstall' first."
+    exit 1
+  fi
+  $SUDO cp "$APP" "$APPDST" || exit 1
+  $SUDO cp -r ctm-data "$DATADST" || exit 1
+  echo "Installed under $PFX. Run 'ctm' to play."
+
+fi

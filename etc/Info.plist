@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CFBundleDevelopmentRegion</key><string>English</string>
+	<key>CFBundleExecutable</key>	<string>CampaignTrailOfTheMummy</string>
+	<key>CFBundleName</key><string>CampaignTrailOfTheMummy</string>
+	<key>CFBundleGetInfoString</key><string>2014-08-05, AK Sommerville</string>
+	<key>CFBundleVersion</key><string>2014-08-05</string>
+	<key>CFBundleShortVersionString</key><string>2014-08-05</string>
+	<key>CFBundleIconFile</key>	<string>ctm.icns</string>
+	<key>CFBundlePackageType</key><string>APPL</string>
+	<!--
+	<key>CFBundleIdentifier</key>
+	<string>org.gnome.gimp</string>
+	<key>CFBundleInfoDictionaryVersion</key>
+	<string>6.0</string>
+	<key>CFBundleSignature</key>
+	<string>gimp</string>
+	<key>NSHumanReadableCopyright</key>
+	<string>© 1995-2013 The GIMP Development Team</string>
+	<key>LSMinimumSystemVersion</key>
+	<string>10.6.0</string>
+	<key>LSMinimumSystemVersionByArchitecture</key>
+	<dict>
+		<key>x86_64</key>
+		<string>10.6.0</string>
+	</dict>
+	<key>NSHighResolutionCapable</key>
+	<true/>
+	-->
+</dict>
+</plist>

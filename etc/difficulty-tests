@@ -1,0 +1,32 @@
+DIFFICULTY TEST
+
+CLR   T DIFF
+---- -- ----
+red   5 easy  => 9,85. Radio-rainbow strategy. No problem.
+red   5 med   => 8,81. Radio-rainbow strategy. No problem. 
+red   5 hard  => 7,66. Radio-rainbow strategy. Had to work a little, I guess.
+red   5 crazy => Lost 3,31. Nice and hard!
+blue  5 easy  => 9,86. No problem.
+blue  5 med   => 9,80. No problem.
+blue  5 hard  => 5,47. Took some effort.
+blue  5 crazy => Lost 0,15. Not a chance, wow.
+red  10 easy  => 7,76, no problem, despite my out of control killing spree.
+red  10 med   => 8,81. Easy. But werewolf made a lot of lousy decisions.
+red  10 hard  => 6,65. Limited my campaign to 6 states. Won pretty easy.
+red  10 crazy => Lost 1,20. Whoa... I got steamrolled.
+red  10 crazy => 5,35. Reduce population of 3 states to two colors, then blast radio for those colors.
+blue 10 easy  => 9,97. 5 states unanimous. Yeah, let's call that "easy".
+blue 10 med   => 8,83. No problem.
+blue 10 hard  => 5,58. Not so bad, I was playing a concessionary strategy.
+blue 10 crazy => Lost 3,30. Yikes, that's hard.
+"             => Lost 3,35. Trying a more ethnic-cleansing strategy. No dice.
+red  20 easy  => 9,99. Unanimous in 7 states.
+red  20 med   => 9,98. Unanimous in 4 states. So easy, I had to toy with it to keep awake.
+red  20 hard  => 6,54. Simple 6-state strategy. Not much trouble.
+red  20 crazy => Lost 1,23. It almost felt possible for a minute...
+blue 20 easy  => 9,100. And I only killed 7 voters, all by accident.
+blue 20 crazy => Lost 2,38. I have the strategy now -- I can win this. Depop 4 states, then campaign in 3.
+"             => Won 3,53. Every state was empty or unanimous. Killed more voters than monsters (407). Wow!
+red  30 easy  => 9,99. Killed more bosses than voters.
+red  30 med   => 9,92. Too easy. Not much fun.
+red  30 crazy => Won 1,100. Unanimous vote! Killed 818 voters! Depop 8 states, unanimized the other one.

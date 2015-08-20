@@ -1,0 +1,13 @@
+#!/bin/sh
+# Watch the files out/stdout.txt and out/stderr.txt
+# For reasons which utterly baffle me, SDLmain redirects stdout and stderr to text files.
+# Without asking. And apparently without even permitting us to disable that behavior.
+# Yeah, because why would anybody not want that?
+
+sleep 0.1
+PID="$(pgrep $(basename $APP))"
+if [ -n "$PID" ] ; then
+  echo > $OUTDIR/stdout.txt
+  echo > $OUTDIR/stderr.txt
+  tail -fq --pid=$PID $OUTDIR/stdout.txt 2>/dev/null & tail -fq --pid=$PID $OUTDIR/stderr.txt 2>/dev/null
+fi

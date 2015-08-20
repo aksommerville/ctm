@@ -1,0 +1,43 @@
+#!/bin/sh
+
+# Define this empty if you don't want to run each instruction through 'sudo'.
+SUDO=sudo
+
+# It's a slightly different process for the Mac...
+if [ "$CTM_CONFIG" = macos ] ; then
+  APPBASE="$(echo $APP | sed 's,^.*/\([^/]*\.app\)/.*$,\1,')"
+  if [ -z "$APPBASE" ] ; then
+    echo "Failed to extract '.app' component from application path '$APP'"
+    exit 1
+  fi
+  DST="/Applications/$APPBASE"
+  if [ -e "$DST" ] ; then
+    $SUDO rm -r "$DST" || exit 1
+    echo "Deleted /Applications/$APPBASE"
+    exit 0
+  fi
+  echo "No installed content found."
+  exit 1
+
+# Most systems...
+else
+  PFX=/usr/local
+  APPDST="$PFX/bin/ctm"
+  DATADST="$PFX/share/ctm"
+  OK=
+  if [ -e "$APPDST" ] ; then
+    OK=1
+    $SUDO rm -rf "$APPDST" || exit 1
+  fi
+  if [ -e "$DATADST" ] ; then
+    OK=1
+    $SUDO rm -rf "$DATADST" || exit 1
+  fi
+  if [ -z "$OK" ] ; then
+    echo "No installed content found."
+    exit 1
+  else
+    echo "Uninstalled."
+  fi
+
+fi

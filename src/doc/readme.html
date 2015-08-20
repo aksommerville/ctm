@@ -1,0 +1,246 @@
+<html><head>
+<title>The Campaign Trail of the Mummy</title>
+
+<style type="text/css">
+body {
+  background-color:#f0e0c0;
+  color:#402000;
+}
+tt {
+  background-color:#ffffff;
+  color:#000000;
+}
+div.technical {
+  border:1px solid #000000;
+  padding-left:10px;
+  padding-right:10px;
+  margin-top:20px;
+  margin-bottom:20px;
+}
+div.game {
+  border:1px solid #000000;
+  padding-left:10px;
+  padding-right:10px;
+  margin-top:20px;
+  margin-bottom:20px;
+}
+table.geotable {
+  border:1px solid #000000;
+  text-align:left;
+}
+table.geotable th {
+  padding-left:10px;
+  border-bottom:1px solid #000000;
+}
+table.geotable td {
+  padding-left:10px;
+  padding-right:10px;
+}
+</style>
+  
+</head><body>
+
+<h1>The Campaign Trail of the Mummy</h1>
+
+<div class="technical">
+
+<h2>Front Matter: Legal, etc.</h2>
+<p>
+Copyright &copy; 2014 AK Sommerville<br/>
+Contact: &#97;&#107;&#115;&#111;&#109;&#109;&#101;&#114;&#118;&#105;&#108;&#108;&#101;&#64;&#103;&#109;&#97;&#105;&#108;&#46;&#99;&#111;&#109;<br/>
+USE AT YOUR OWN RISK. ALL WARRANTIES DISCLAIMED.<br/>
+This software is free to use, modify, and distribute.<br/>
+If you must insist on legal terms, let's use <a href='http://www.gnu.org/licenses/gpl.html'>GNU GPL</a>.<br/>
+</p>
+<p>
+If you didn't receive source code with the program, email me and I'll send you the latest.
+</p>
+<p>
+Everything in this game is my own creation, down to the very last byte.<br/>
+Feel free to reuse any of it. Code, graphics, sound effects... go nuts!<br/>
+</p>
+
+<h2>Building From Source</h2>
+<p>
+CTM was written principally for the Raspberry Pi.
+I have also tested it thoroughly on MacOS (Mavericks) and Debian (Wheezy).
+I've ported it to Windows using MinGW and WINE, but I don't use Windows at home so that's entirely untested.
+CTM can be configured to use <a href='http://www.libsdl.org/'>libSDL</a> for its video, audio, and input, so that makes it very portable.
+</p>
+<p>
+We assume a GNU-ish build environment: <tt>gcc</tt>, <tt>make</tt>, etc.
+Compiling should be as simple as running <tt>make</tt> in the unpacked directory.
+If you have specific needs at compile time, you may want to set <tt>CTM_CONFIG</tt> to a unique value, and add a new configuration block in <tt>Makefile</tt>.
+Examine <tt>Makefile</tt>, it should be pretty self-explanatory.
+I use <tt>CTM_CONFIG</tt> to distinguish target platforms, eg there is a lot of code for Raspberry Pi which must not be compiled for MacOS, etc.
+</p>
+<p>
+Once built, run <tt>make install</tt> to dump the compiled program in a predetermined location on your system.
+See <tt>etc/tool/install</tt> if you want to tweak that process (it's very simple).
+</p>
+
+<h2>Installation</h2>
+<p>
+If you have the source code, use its installer.
+</p>
+<p>
+For MacOS, the distributable package is fully self-contained. Put it whereever you want and it should just work.
+</p>
+<p>
+For other systems, you should copy the executable (<tt>ctm</tt>) to somewhere in your <tt>PATH</tt>.
+I recommend <tt>/usr/local/bin/ctm</tt>.
+Then put the whole directory <tt>ctm-data</tt> somewhere that the program can find it.
+I recommend <tt>/usr/local/share/ctm</tt>.
+If necessary, set <tt>CTM_ROOT</tt> when running to declare the data directory's path.
+</p>
+
+<h2>Running the Program</h2>
+<p>
+Launch <tt>ctm</tt> with no arguments and everything should just work.
+If it fails to launch, confirm that the data directory is somewhere findable (or set <tt>CTM_ROOT</tt>).
+There are two extra arguments if you want them: <tt>--fullscreen=0|1</tt> and <tt>--audio=0|1</tt>.
+</p>
+<p>
+Press <tt>ESC</tt> at any time to quit.
+</p>
+<p>
+When running under X11 (Linux), press <tt>F</tt> to toggle fullscreen.
+In theory, this should work with libSDL (MacOS,Windows) too, but it hardly ever does.
+The Raspberry Pi build uses video hardware directly, so it's always fullscreen.
+</p>
+<p>
+Input should self-configure.
+On a keyboard, use arrow keys and <tt>Z</tt>, <tt>X</tt>, <tt>C</tt>, and <tt>ENTER</tt>.
+Joysticks map each button to Pause or the three assignable actions, willy-nilly.
+If you don't like the way a device is mapped, see <tt>input.cfg</tt> in your data directory.
+When an unknown device is detected, we dump its configuration text to the console.
+You can copy and paste that into <tt>input.cfg</tt>, and tweak as necessary.
+The program itself never modifies <tt>input.cfg</tt>.
+</p>
+
+</div>
+
+<div class="game">
+
+<h2>Backstory</h2>
+<p>
+You are an ancient Egpytian Pharaoh whose mummy has come to live to avenge yourself against the archaeologists who defiled your tomb.
+Also, you're running for President.
+</p>
+<p>
+American politics are driven by two parties. There's the Frostbite party (blue), and the Blood party (red).
+FWIW, these aren't really meant to correspond to the real-world Democratic and Republican parties.
+I've tried to keep real politics out of the game as much as possible.
+</p>
+<p>
+Presidential elections in America are conducted through the Electoral College, meaning that only someone with higher education can understand how it works.
+Each of the 9 [sic] states conducts its own election, and their picks are then compared to each other.
+In real life, each state has a count of electoral votes proportionate to its representation in Congress.
+In CTM, each state has just one electoral vote.
+It is possible for a candidate to win the most votes, but still lose the election.
+(In real life, it last happened in 2000; in CTM it happens pretty often).
+Ties in CTM are unusual but possible. When it happens, we simply don't declare a winner.
+</p>
+
+<h2>How to Win an Election</h2>
+<p>
+If a voter is likely to vote for your opponent, you have three basic options:
+<ol>
+  <li>Ignore him. If you know his vote won't matter, then who cares who he votes for?</li>
+  <li>Persuade him to your side. This is done with speeches or bribes.</li>
+  <li>Kill him.</li>
+</ol>
+</p>
+<p>
+There isn't enough time to speak to every voter individually.
+A better way to get your message out is to use the radio.
+There are 15 radio stations in America: One for each state, and one for each of the six colors.
+Every voter is reachable via two of those radio stations.
+When you speak on the radio, every eligible voter hears it.
+</p>
+<p>
+A speech heard on the radio is not as persuasive as a speech heard in person, but a whole lot more people will hear it.
+</p>
+<p>
+Voters are also swayed when they see you kill something.
+If you kill a pest (racoon, owl, kitten, etc), they will like you.
+If you kill a human, they will reconsider.
+So if you plan to reduce the voting pool via murder, try not to leave any witnesses alive.
+Just like real life.
+</p>
+<p>
+When a voter is persuaded, there's a one-second window where new information will be ignored.
+You can take advantage of this by delivering a speech immediately before you murder someone.
+The witnesses nearby will be busy thinking about what you said, and they won't notice you killing a guy.
+(note: This doesn't work in real life).
+</p>
+<p>
+If you acquire a projectile weapon, no one will know where the projectiles came from.
+You can kill blamelessly with these.
+</p>
+<p>
+As Lyndon Johnson used to say:
+<div><i>"You can't make an omelette without killing a bunch of people."</i></div>
+</p>
+
+<h2>Opinion Polls</h2>
+<p>
+In your inventory screen, there's a map of the country, a scatter graph, and two bar graphs.
+States in the map show blue or red if a state is expected to vote one way or the other.
+They may be gray, if it's too close to call.
+The scatter graph shows a dot for every voter in this state, organized by color.
+The dots' position left or right indicates their sentiment.
+Far left means they're very likely to vote blue, far right means they're very likely to vote red.
+The bar graphs show a simple summary of the current state and the whole country.
+</p>
+<p>
+You can't get demographic-specific data nationwide, only for the state you're standing in.
+</p>
+
+<h2>Geography</h2>
+<p>
+In our condensed version of the United States, there are only nine states.
+There are also six colors of people, and each color has one state where they are the majority.
+The states have disparate populations, in the same order as their real-life counterparts. (Same order, but not proportionate).
+</p>
+<table><tr>
+  <td><img src='world-map.png'/></td>
+  <td><table class='geotable'>
+    <tr><th>State</th><th>Color</th></tr>
+    <tr><td>Alaska</td><td>White, like snow.</td></tr>
+    <tr><td>Wisconsin</td><td>Yellow, like cheese.</td></tr>
+    <tr><td>Vermont</td><td>Green, like mountains.</td></tr>
+    <tr><td>California</td><td>None</td></tr>
+    <tr><td>Kansas</td><td>None</td></tr>
+    <tr><td>Virginia</td><td>Red, like lovers.</td></tr>
+    <tr><td>Hawaii</td><td>Blue, like water.</td></tr>
+    <tr><td>Texas</td><td>Black, like oil.</td></tr>
+    <tr><td>Florida</td><td>None</td></tr>
+  </table></td>
+</tr></table>
+<p>
+Red and blue voters begin with a significant bias towards that party.
+Other voters begin close to neutral.
+</p>
+<p>
+Players begin in either Hawaii or Virginia, depending on their party.
+The state where you begin is already solidly supporting you.
+</p>
+
+<h2>Monsters</h2>
+<p>
+It's a good idea to kill beasts any time you see them.
+They leave little prizes, and any voters who see you killing monsters will favor you.
+</p>
+<p>
+There are three beasts that can appear anywhere: Racoons, owls, and kittens.
+Each state also has its own local pest, which is no different from the others except in appearance.
+</p>
+<p>
+There are also nine minibosses, one in each state.
+Kill a miniboss and you get a Fabulous Prize, usually a new weapon.
+</p>
+
+</div>
+
+</body></html>

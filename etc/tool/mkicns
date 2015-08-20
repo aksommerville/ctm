@@ -1,0 +1,42 @@
+#!/usr/bin/env python
+import sys,os
+
+if len(sys.argv)<3:
+  sys.stderr.write("Usage: %s PNGFILES... ICNSFILE\n"%(sys.argv[0]))
+  sys.exit(1)
+
+def rdbe(src):
+  dst=0
+  for ch in src:
+    dst<<=8
+    dst|=ord(ch)
+  return dst
+
+def wrbe(src,size):
+  if size==4: return chr((src>>24)&0xff)+chr((src>>16)&0xff)+chr((src>>8)&0xff)+chr(src&0xff)
+  if size==2: return chr((src>>8)&0xff)+chr(src&0xff)
+  if size==1: return chr(src&0xff)
+  raise Exception(size)
+
+icns="icns\0\0\0\0"
+for srcpath in sys.argv[1:-1]:
+  src=open(srcpath,'r').read()
+  if not src.startswith("\x89PNG\r\n\x1a\n\0\0\0\x0dIHDR"):
+    sys.stderr.write("%s: Not a PNG file\n"%(srcpath))
+    sys.exit(1)
+  w=rdbe(src[16:20])
+  h=rdbe(src[20:24])
+  if w==16 and h==16: icon="icp4"
+  elif w==32 and h==32: icon="icp5"
+  elif w==64 and h==64: icon="icp6"
+  elif w==128 and h==128: icon="ic07"
+  elif w==256 and h==256: icon="ic08"
+  elif w==512 and h==512: icon="ic09"
+  else:
+    sys.stderr.write("%s: Bad size (%d,%d)\n"%(srcpath,w,h))
+    sys.exit(1)
+  icon+=wrbe(len(src)+8,4)
+  icns+=icon+src
+
+icns=icns[:4]+wrbe(len(icns),4)+icns[8:]
+open(sys.argv[-1],'w').write(icns)

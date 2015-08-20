@@ -1,0 +1,30 @@
+#!/usr/bin/env python
+import sys,os,math
+
+if len(sys.argv)!=3:
+  sys.stderr.write("Usage: %s INPUT OUTPUT\n"%(sys.argv[0]))
+  sys.exit(1)
+
+varname=os.path.basename(sys.argv[2]).split('.')[0]
+
+src=open(sys.argv[1],'r').read()
+pixelc=len(src)/4
+w=int(math.sqrt(pixelc))
+h=pixelc/w
+if w*h*4!=len(src):
+  sys.stderr.write("%s: Expected square RGBA image.\n"%(sys.argv[1]))
+  sys.exit(1)
+
+dst="const unsigned char %s[]={\n"%(varname)
+linelen=0
+for ch in src:
+  dst+="0x%02x,"%(ord(ch))
+  linelen+=5
+  if linelen>=100:
+    dst+="\n"
+    linelen=0
+if linelen: dst+="\n"
+dst+="};\n"
+dst+="const int %s_w=%d;\nconst int %s_h=%d;\n"%(varname,w,varname,h)
+
+open(sys.argv[2],'w').write(dst)
