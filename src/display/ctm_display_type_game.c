@@ -149,9 +149,15 @@ static int ctm_display_game_draw_foy_indicator(struct ctm_display *display) {
   if (x<CTM_TILESIZE) x=CTM_TILESIZE;
   else if (x>display->fbw-CTM_TILESIZE) x=display->fbw-CTM_TILESIZE;
   y-=DISPLAY->scrolly;
-  if (y<CTM_TILESIZE) y=CTM_TILESIZE;
+  if (y<CTM_TILESIZE*3) y=CTM_TILESIZE*3;
   else if (y>display->fbh-CTM_TILESIZE) y=display->fbh-CTM_TILESIZE;
+
+  // What does it look like?
   uint8_t tile=0x70+((dy+1)*16)+dx+1;
+  uint8_t alpha=(ctm_game.play_framec&0x3f)<<2;
+  if (ctm_game.play_framec&0x40) {
+    alpha=0xff-alpha;
+  }
 
   // Make two sprites: arrow and icon. These are in the 'uisprites' sheet.
   if (ctm_video_begin_sprites()<0) return -1;
@@ -163,7 +169,7 @@ static int ctm_display_game_draw_foy_indicator(struct ctm_display *display) {
   vtxv[0].r=0x80;
   vtxv[0].g=0x80;
   vtxv[0].b=0x80;
-  vtxv[0].a=0xff;
+  vtxv[0].a=alpha;
   vtxv[0].ta=0x00;
   vtxv[0].flop=0;
   vtxv[1]=vtxv[0];

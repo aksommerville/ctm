@@ -2,8 +2,8 @@
 #include "game/ctm_grid.h"
 #include "game/ctm_geography.h"
 
-/* There are six cells on the world map which are unreachable: Outer Banks NC.
- * This test confirms that even though they look solid, they are in fact unpassable.
+/* There are a few cells on the world map which are unreachable.
+ * This test confirms that even though they look normal, they are in fact unpassable.
  * !!! This test is dependant on asset data. !!!
  */
 
