@@ -82,6 +82,8 @@ uint16_t ctm_input_device_state(int devid); // Devices track their own state ind
 #define CTM_BTNID_PAUSE       0x0080
 #define CTM_BTNID_RSVDBITS    0x7f00
 
+#define CTM_BTNID_ANYKEY      0x00f0
+
 #define CTM_BTNID_SIGNAL       0x8000
 #define CTM_BTNID_QUIT         0x8001
 #define CTM_BTNID_RESET        0x8002

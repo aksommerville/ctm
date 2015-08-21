@@ -129,13 +129,13 @@ static int ctm_game_update_play() {
     if (!--(ctm_game.news_counter)) ctm_game.news_counter=-1;
     return 0;
   } else if (ctm_game.news_counter==-1) {
-    for (i=1;i<=4;i++) if (ctm_input_by_playerid[i]) {
+    for (i=1;i<=4;i++) if (ctm_input_by_playerid[i]&CTM_BTNID_ANYKEY) {
       ctm_game.news_counter=-2;
     }
     return 0;
   } else if (ctm_game.news_counter==-2) {
     int zero=1;
-    for (i=1;i<4;i++) if (ctm_input_by_playerid[i]) zero=0;
+    for (i=1;i<4;i++) if (ctm_input_by_playerid[i]&CTM_BTNID_ANYKEY) zero=0;
     if (zero) {
       ctm_audio_effect(CTM_AUDIO_EFFECTID_DISMISS_NEWS,0xff);
       ctm_game.news_counter=0;
