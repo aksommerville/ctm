@@ -1,5 +1,5 @@
 ---- Keyboard configuration for SDL and X11.
----- Wanted level doesn't always appear.
 ---- Tests.
 ---- High-resolution graphics.
 ---- Quit menu.
+---- FOY indicator should stay outside OSD.

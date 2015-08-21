@@ -192,6 +192,22 @@ static void ctm_display_game_draw_equipped_item(struct ctm_vertex_sprite *vtxv,i
   if ((itemid>0)&&(itemid<16)) vtxv->tile+=itemid;
 }
 
+static void ctm_display_game_draw_wanted_level(int x,int y,int w,int h,int wanted) {
+  if (wanted>=CTM_WANTED_MAX) {
+    if (ctm_draw_rect(x,y,w,h,0xff8000ff)<0) return;
+  } else if (wanted>0) {
+    uint32_t barcolor;
+    if (wanted>=CTM_WANTED_MAX-CTM_WANTED_INCREMENT) barcolor=0xff0000ff;
+    else barcolor=0xffff00ff;
+    int sep=(wanted*w)/CTM_WANTED_MAX;
+    if (ctm_draw_rect(x,y,sep,h,barcolor)<0) return;
+    if (ctm_draw_rect(x+sep,y,w-sep,h,0x80808080)<0) return;
+  } else {
+    // Draw an empty bar? No, just don't draw anything at zero.
+    //if (ctm_draw_rect(wantedl,wantedy,wantedw,wantedh,0x808080ff)<0) return;
+  }
+}
+
 static int ctm_display_game_draw_overlay_sprites(struct ctm_display *display,struct ctm_sprite_player *SPR) {
   int i;
 
@@ -203,18 +219,12 @@ static int ctm_display_game_draw_overlay_sprites(struct ctm_display *display,str
     int wantedy=CTM_TILESIZE+4;
     int wantedh=CTM_TILESIZE-8;
     int wanted=SPR->wanted[ctm_state_for_pixel(SPR->hdr.x,SPR->hdr.y)];
-    if (wanted>=CTM_WANTED_MAX) {
-      if (ctm_draw_rect(wantedl,wantedy,wantedw,wantedh,0xff8000ff)<0) return -1;
-    } else if (wanted>0) {
-      uint32_t barcolor;
-      if (wanted>=CTM_WANTED_MAX-CTM_WANTED_INCREMENT) barcolor=0xff0000ff;
-      else barcolor=0xffff00ff;
-      int sep=(wanted*wantedw)/CTM_WANTED_MAX;
-      if (ctm_draw_rect(wantedl,wantedy,sep,wantedh,barcolor)<0) return -1;
-      if (ctm_draw_rect(wantedl+sep,wantedy,wantedw-sep,wantedh,0x80808080)<0) return -1;
-    } else {
-      //if (ctm_draw_rect(wantedl,wantedy,wantedw,wantedh,0x808080ff)<0) return -1;
-    }
+    ctm_display_game_draw_wanted_level(wantedl,wantedy,wantedw,wantedh,wanted);
+  } else {
+    int wantedy=CTM_TILESIZE<<1;
+    int wantedh=CTM_TILESIZE>>1;
+    int wanted=SPR->wanted[ctm_state_for_pixel(SPR->hdr.x,SPR->hdr.y)];
+    ctm_display_game_draw_wanted_level(0,wantedy,display->fbw,wantedh,wanted);
   }
 
   /* Begin proper sprites. */
