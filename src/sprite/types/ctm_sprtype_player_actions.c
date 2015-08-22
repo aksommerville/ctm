@@ -35,6 +35,13 @@ int ctm_flames_drop(struct ctm_sprite *owner);
 #define CTM_METAL_BLADE_TTL 75
 #define CTM_ARROW_TTL 75
 
+#define CTM_ARROW_SPEED ((CTM_TILESIZE*4)/16)
+#define CTM_COIN_SPEED ((CTM_TILESIZE*3)/16)
+#define CTM_WAND_SPEED ((CTM_TILESIZE*4)/16)
+#define CTM_BLADE_SPEED_CARDINAL ((CTM_TILESIZE*4)/16)
+#define CTM_BLADE_SPEED_DIAGONAL ((CTM_TILESIZE*3)/16)
+#define CTM_BONK_RADIUS ((CTM_TILESIZE*8)/16)
+
 /* Setup item store and inventory.
  */
 
@@ -341,12 +348,12 @@ static int ctm_player_fire_arrow(struct ctm_sprite *spr) {
   CTM_SFX(ARROW)
   struct ctm_sprite *missile;
   switch (SPR->col) {
-    case 0: missile=ctm_sprite_missile_new(spr,0xc0,0,4); break;
-    case 1: missile=ctm_sprite_missile_new(spr,0xc1,0,-4); break;
+    case 0: missile=ctm_sprite_missile_new(spr,0xc0,0,CTM_ARROW_SPEED); break;
+    case 1: missile=ctm_sprite_missile_new(spr,0xc1,0,-CTM_ARROW_SPEED); break;
     case 2: if (spr->flop) {
-        missile=ctm_sprite_missile_new(spr,0xc2,4,0);
+        missile=ctm_sprite_missile_new(spr,0xc2,CTM_ARROW_SPEED,0);
       } else {
-        missile=ctm_sprite_missile_new(spr,0xc2,-4,0);
+        missile=ctm_sprite_missile_new(spr,0xc2,-CTM_ARROW_SPEED,0);
       } break;
   }
   if (!missile) return -1;
@@ -359,12 +366,12 @@ static int ctm_player_throw_coin(struct ctm_sprite *spr) {
   CTM_SFX(THROW_COIN)
   struct ctm_sprite *missile;
   switch (SPR->col) {
-    case 0: missile=ctm_sprite_missile_new(spr,0xfb,0,3); break;
-    case 1: missile=ctm_sprite_missile_new(spr,0xfb,0,-3); break;
+    case 0: missile=ctm_sprite_missile_new(spr,0xfb,0,CTM_COIN_SPEED); break;
+    case 1: missile=ctm_sprite_missile_new(spr,0xfb,0,-CTM_COIN_SPEED); break;
     case 2: if (spr->flop) {
-        missile=ctm_sprite_missile_new(spr,0xfb,3,0);
+        missile=ctm_sprite_missile_new(spr,0xfb,CTM_COIN_SPEED,0);
       } else {
-        missile=ctm_sprite_missile_new(spr,0xfb,-3,0);
+        missile=ctm_sprite_missile_new(spr,0xfb,-CTM_COIN_SPEED,0);
       } break;
   }
   if (!missile) return -1;
@@ -376,12 +383,12 @@ static int ctm_player_fire_magic_wand(struct ctm_sprite *spr) {
   CTM_SFX(WAND)
   struct ctm_sprite *missile;
   switch (SPR->col) {
-    case 0: missile=ctm_sprite_missile_new(spr,0x53,0,4); break;
-    case 1: missile=ctm_sprite_missile_new(spr,0x54,0,-4); break;
+    case 0: missile=ctm_sprite_missile_new(spr,0x53,0,CTM_WAND_SPEED); break;
+    case 1: missile=ctm_sprite_missile_new(spr,0x54,0,-CTM_WAND_SPEED); break;
     case 2: if (spr->flop) {
-        missile=ctm_sprite_missile_new(spr,0x55,4,0);
+        missile=ctm_sprite_missile_new(spr,0x55,CTM_WAND_SPEED,0);
       } else {
-        missile=ctm_sprite_missile_new(spr,0x55,-4,0);
+        missile=ctm_sprite_missile_new(spr,0x55,-CTM_WAND_SPEED,0);
       } break;
   }
   if (!missile) return -1;
@@ -402,7 +409,8 @@ static int ctm_player_fire_metal_blade(struct ctm_sprite *spr) {
         dx=-1; if (SPR->pvinput&CTM_BTNID_UP) dy=-1; else if (SPR->pvinput&CTM_BTNID_DOWN) dy=1; break;
       } break;
   }
-  if (dx&&dy) { dx*=3; dy*=3; } else { dx*=4; dy*=4; }
+  if (dx&&dy) { dx*=CTM_BLADE_SPEED_DIAGONAL; dy*=CTM_BLADE_SPEED_DIAGONAL; } 
+  else { dx*=CTM_BLADE_SPEED_CARDINAL; dy*=CTM_BLADE_SPEED_CARDINAL; }
   struct ctm_sprite *missile=ctm_sprite_missile_new(spr,0x0d,dx,dy);
   if (!missile) return -1;
   if (ctm_missile_add_ttl(missile,CTM_METAL_BLADE_TTL)<0) return -1;
@@ -465,12 +473,12 @@ static int ctm_player_throw_boomerang(struct ctm_sprite *spr) {
 
 static int ctm_player_bonk(struct ctm_sprite *spr) {
   int dx=0,dy=0;
-  int l=spr->x-8,t=spr->y-8;
+  int l=spr->x-CTM_BONK_RADIUS,t=spr->y-CTM_BONK_RADIUS;
   if (SPR->col==0) { t+=CTM_TILESIZE; dy=1; }
   else if (SPR->col==1) { t-=CTM_TILESIZE; dy=-1; }
   else if (spr->flop) { l+=CTM_TILESIZE; dx=1; }
   else { l-=CTM_TILESIZE; dx=-1; }
-  int r=l+16,b=t+16;
+  int r=l+(CTM_BONK_RADIUS<<1),b=t+(CTM_BONK_RADIUS<<1);
   dx*=CTM_TILESIZE;
   dy*=CTM_TILESIZE;
   uint32_t prop=CTM_TILEPROP_SOLID|CTM_TILEPROP_POROUS|CTM_TILEPROP_DOOR|CTM_TILEPROP_HOLE|CTM_TILEPROP_WATER;

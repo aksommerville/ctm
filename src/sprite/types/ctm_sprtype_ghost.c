@@ -7,6 +7,8 @@ struct ctm_sprite_ghost {
 
 #define SPR ((struct ctm_sprite_ghost*)spr)
 
+#define CTM_GHOST_SPEED ((CTM_TILESIZE*1)/16)
+
 /* Init.
  */
 
@@ -27,7 +29,7 @@ static int _ctm_ghost_init(struct ctm_sprite *spr) {
 static int _ctm_ghost_update(struct ctm_sprite *spr) {
   if (spr->opacity<=3) return ctm_sprite_kill(spr);
   spr->opacity-=3;
-  spr->y--;
+  spr->y-=CTM_GHOST_SPEED;
   return 0;
 }
 

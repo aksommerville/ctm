@@ -18,13 +18,22 @@ int ctm_player_unswing_sword(struct ctm_sprite *spr);
 int ctm_player_end_speech(struct ctm_sprite *spr);
 int ctm_player_deal_damage(struct ctm_sprite *spr,int x,int y,int w,int h);
 
-#define CTM_PLAYER_WALK_SPEED 2
+#define CTM_PLAYER_WALK_SPEED (CTM_TILESIZE>>3)
 
 #define CTM_PLAYER_INVINCIBLE_TIME 60
 
 #define CTM_KISS_OF_DEATH_RADIUS (CTM_TILESIZE)
 #define CTM_KISS_OF_DEATH_FAVOR 10
 #define CTM_WANTED_FAVOR 20
+
+/* Some magic numbers from before resolution flexibility. */
+#define CTM_PLAYER_HEAD_OFFSET ((CTM_TILESIZE*13)/16)
+#define CTM_PLAYER_HEAD_SWING_DOWN ((CTM_TILESIZE*3)/16)
+#define CTM_PLAYER_HEAD_SWING_HORZ ((CTM_TILESIZE*2)/16)
+#define CTM_PLAYER_SPEECH_FROM_HEAD ((CTM_TILESIZE*18)/16)
+#define CTM_PLAYER_HAZARD_RADIUS ((CTM_TILESIZE*8)/16)
+#define CTM_SWORD_WIDTH ((CTM_TILESIZE*8)/16)
+#define CTM_SWORD_LENGTH ((CTM_TILESIZE*24)/16)
 
 /* Delete and initialize.
  */
@@ -98,7 +107,7 @@ static int _ctm_player_draw(struct ctm_sprite *spr,int addx,int addy) {
   vtxv[bodyix].flop=spr->flop;
 
   vtxv[headix].x=spr->x+addx;
-  vtxv[headix].y=spr->y+addy-13;
+  vtxv[headix].y=spr->y+addy-CTM_PLAYER_HEAD_OFFSET;
   vtxv[headix].tile=0x50|SPR->col;
   vtxv[headix].flop=spr->flop;
 
@@ -108,34 +117,34 @@ static int _ctm_player_draw(struct ctm_sprite *spr,int addx,int addy) {
     vtxv[swordix].tile=(SPR->boxing?0x83:0xa0)+SPR->col;
     vtxv[swordix].flop=spr->flop;
     switch (SPR->col) {
-      case 0x00: vtxv[swordix].y+=CTM_TILESIZE; vtxv[headix].y+=3; break;
+      case 0x00: vtxv[swordix].y+=CTM_TILESIZE; vtxv[headix].y+=CTM_PLAYER_HEAD_SWING_DOWN; break;
       case 0x01: vtxv[swordix].y-=CTM_TILESIZE; break;
       case 0x02: if (spr->flop) {
           vtxv[swordix].x+=CTM_TILESIZE;
-          vtxv[headix].x+=2;
+          vtxv[headix].x+=CTM_PLAYER_HEAD_SWING_HORZ;
         } else {
           vtxv[swordix].x-=CTM_TILESIZE;
-          vtxv[headix].x-=2;
+          vtxv[headix].x-=CTM_PLAYER_HEAD_SWING_HORZ;
         } break;
     }
     
   } else if (SPR->speaking) {
     vtxv[bodyix].tile=SPR->col|0xb0;
     vtxv[swordix].x=spr->x+addx;
-    vtxv[swordix].y=vtxv[headix].y-CTM_TILESIZE-2;
+    vtxv[swordix].y=vtxv[headix].y-CTM_PLAYER_SPEECH_FROM_HEAD;
     vtxv[swordix].tile=0xd0;
     vtxv[swordix].flop=0;
     
   } else if (SPR->holdgrp->sprc) {
     switch (SPR->col) {
-      case 0x00: vtxv[swordix].y+=CTM_TILESIZE; vtxv[headix].y+=3; break;
+      case 0x00: vtxv[swordix].y+=CTM_TILESIZE; vtxv[headix].y+=CTM_PLAYER_HEAD_SWING_DOWN; break;
       case 0x01: vtxv[swordix].y-=CTM_TILESIZE; break;
       case 0x02: if (spr->flop) {
           vtxv[swordix].x+=CTM_TILESIZE;
-          vtxv[headix].x+=2;
+          vtxv[headix].x+=CTM_PLAYER_HEAD_SWING_HORZ;
         } else {
           vtxv[swordix].x-=CTM_TILESIZE;
-          vtxv[headix].x-=2;
+          vtxv[headix].x-=CTM_PLAYER_HEAD_SWING_HORZ;
         } break;
     }
   }
@@ -552,9 +561,9 @@ static int _ctm_player_update(struct ctm_sprite *spr) {
       struct ctm_sprite *hazard=ctm_group_hazard.sprv[i];
 						if (hazard->interior!=spr->interior) continue;
       int dx=hazard->x-spr->x;
-      if ((dx<-8)||(dx>8)) continue;
+      if ((dx<-CTM_PLAYER_HAZARD_RADIUS)||(dx>CTM_PLAYER_HAZARD_RADIUS)) continue;
       int dy=hazard->y-spr->y;
-      if ((dy<-8)||(dy>8)) continue;
+      if ((dy<-CTM_PLAYER_HAZARD_RADIUS)||(dy>CTM_PLAYER_HAZARD_RADIUS)) continue;
       if (ctm_sprite_hurt(spr,hazard)<0) return -1;
       break;
     }
@@ -569,12 +578,12 @@ static int _ctm_player_update(struct ctm_sprite *spr) {
   /* Deal damage from sword. */
   if (SPR->swinging) {
     switch (SPR->col) {
-      case 0x00: if (ctm_player_deal_damage(spr,spr->x-4,spr->y,8,24)<0) return -1; break;
-      case 0x01: if (ctm_player_deal_damage(spr,spr->x-4,spr->y-24,8,24)<0) return -1; break;
+      case 0x00: if (ctm_player_deal_damage(spr,spr->x-(CTM_SWORD_WIDTH>>1),spr->y,CTM_SWORD_WIDTH,CTM_SWORD_LENGTH)<0) return -1; break;
+      case 0x01: if (ctm_player_deal_damage(spr,spr->x-(CTM_SWORD_WIDTH>>1),spr->y-CTM_SWORD_LENGTH,CTM_SWORD_WIDTH,CTM_SWORD_LENGTH)<0) return -1; break;
       case 0x02: if (spr->flop) {
-          if (ctm_player_deal_damage(spr,spr->x,spr->y-4,24,8)<0) return -1;
+          if (ctm_player_deal_damage(spr,spr->x,spr->y-(CTM_SWORD_WIDTH>>1),CTM_SWORD_LENGTH,CTM_SWORD_WIDTH)<0) return -1;
         } else {
-          if (ctm_player_deal_damage(spr,spr->x-24,spr->y-4,24,8)<0) return -1;
+          if (ctm_player_deal_damage(spr,spr->x-CTM_SWORD_LENGTH,spr->y-(CTM_SWORD_WIDTH>>1),CTM_SWORD_LENGTH,CTM_SWORD_WIDTH)<0) return -1;
         } break;
     }
   }

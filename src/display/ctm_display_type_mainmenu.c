@@ -3,8 +3,8 @@
 #include "video/ctm_video_internal.h"
 
 // One axis will match, the other may run larger.
-#define CTM_MENUW_MIN 512
-#define CTM_MENUH_MIN 384
+#define CTM_MENUW_MIN CTM_RESIZE(512)
+#define CTM_MENUH_MIN CTM_RESIZE(384)
 
 /* Object type.
  */
@@ -72,11 +72,11 @@ static int _ctm_display_mainmenu_resized(struct ctm_display *display) {
 
 static int ctm_mainmenu_draw_title(struct ctm_display *display) {
   int midx=display->fbw>>1;
-  int midy=128;
-  int quartx=((display->fbw>>1)-128)>>1; // actually a little less than a quarter width
-  if (ctm_draw_texture(midx-128,midy-128,256,256,ctm_video.texid_title,0)<0) return -1;
-  if (ctm_draw_texture(quartx-64,midy,128,128,ctm_video.texid_logo_frostbite,0)<0) return -1;
-  if (ctm_draw_texture(display->fbw-quartx-64,midy,128,128,ctm_video.texid_logo_blood,0)<0) return -1;
+  int midy=CTM_RESIZE(128);
+  int quartx=((display->fbw>>1)-CTM_RESIZE(128))>>1; // actually a little less than a quarter width
+  if (ctm_draw_texture(midx-CTM_RESIZE(128),midy-CTM_RESIZE(128),CTM_RESIZE(256),CTM_RESIZE(256),ctm_video.texid_title,0)<0) return -1;
+  if (ctm_draw_texture(quartx-CTM_RESIZE(64),midy,CTM_RESIZE(128),CTM_RESIZE(128),ctm_video.texid_logo_frostbite,0)<0) return -1;
+  if (ctm_draw_texture(display->fbw-quartx-CTM_RESIZE(64),midy,CTM_RESIZE(128),CTM_RESIZE(128),ctm_video.texid_logo_blood,0)<0) return -1;
   return 0;
 }
 
@@ -113,7 +113,7 @@ static int ctm_mainmenu_draw_sprites_PLAYERC(struct ctm_display *display,int opt
     int p=4+i*2;
     vtxv[p].x=vtxv[p+1].x=optx+((i+1)*optw)/(DISPLAY->playerc+1);
     vtxv[p].y=opty+(opth>>1)+7;
-    vtxv[p+1].y=vtxv[p].y-13;
+    vtxv[p+1].y=vtxv[p].y-CTM_RESIZE(13);
     vtxv[p].tile=0x50;
     vtxv[p+1].tile=0x40;
   }
@@ -254,9 +254,9 @@ static int _ctm_display_mainmenu_draw_fb(struct ctm_display *display) {
   glClearColor(0.3,0.1,0.0,1.0);
   glClear(GL_COLOR_BUFFER_BIT);
   if (ctm_mainmenu_draw_title(display)<0) return -1;
-  int optw=400,opth=50;
+  int optw=CTM_RESIZE(400),opth=CTM_RESIZE(50);
   int optx=(display->fbw>>1)-(optw>>1);
-  int opty=256+((display->fbh-256)>>1)-(opth>>1);
+  int opty=CTM_RESIZE(256)+((display->fbh-CTM_RESIZE(256))>>1)-(opth>>1);
   if (ctm_draw_rect(optx,opty,optw,opth,0x301000ff)<0) return -1;
 
   /* Place sprites for each phase. */

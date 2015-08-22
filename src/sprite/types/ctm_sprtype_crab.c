@@ -25,7 +25,8 @@ struct ctm_sprite_crab {
 
 #define CTM_CRAB_FIRE_MIN    60
 #define CTM_CRAB_FIRE_MAX   180
-#define CTM_CRAB_FIRE_SPEED   3
+#define CTM_CRAB_FIRE_SPEED   ((CTM_TILESIZE*3)/16)
+#define CTM_CRAB_WALK_SPEED   ((CTM_TILESIZE*1)/16)
 
 /* Delete.
  */
@@ -89,7 +90,7 @@ static int _ctm_crab_update(struct ctm_sprite *spr) {
   
   if (SPR->invincible>0) SPR->invincible--;
   
-  spr->x+=SPR->dx;
+  spr->x+=SPR->dx*CTM_CRAB_WALK_SPEED;
   if (spr->x<SPR->xlo) { spr->x=SPR->xlo; if (SPR->dx<0) SPR->dx=-SPR->dx; }
   else if (spr->x>SPR->xhi) { spr->x=SPR->xhi; if (SPR->dx>0) SPR->dx=-SPR->dx; }
 

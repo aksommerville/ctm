@@ -27,6 +27,8 @@ struct ctm_sprite_vampire {
 #define CTM_VAMPIRE_TELETIME_MIN  10
 #define CTM_VAMPIRE_TELETIME_MAX  40
 
+#define CTM_VAMPIRE_HEAD_Y_ADJUST ((CTM_TILESIZE*13)/16)
+
 /* Delete.
  */
 
@@ -54,7 +56,7 @@ static int _ctm_vampire_draw(struct ctm_sprite *spr,int addx,int addy) {
   vtxv[0].tile=0x39;
 
   vtxv[1].x=spr->x+addx;
-  vtxv[1].y=spr->y+addy-13;
+  vtxv[1].y=spr->y+addy-CTM_VAMPIRE_HEAD_Y_ADJUST;
   vtxv[1].tile=0x29;
   if (SPR->invincible) vtxv[1].tile++;
 
@@ -109,7 +111,7 @@ static int _ctm_vampire_update(struct ctm_sprite *spr) {
       SPR->teletime=CTM_VAMPIRE_TELETIME_MIN+rand()%(CTM_VAMPIRE_TELETIME_MAX-CTM_VAMPIRE_TELETIME_MIN+1);
       struct ctm_sprite *fireball=ctm_sprite_fireball_new(spr,0x3a);
       if (!fireball) return -1;
-      fireball->y-=13;
+      fireball->y-=CTM_VAMPIRE_HEAD_Y_ADJUST;
     }
     
   } else if (--(SPR->teletime)<=0) { // ready to disappear...

@@ -13,6 +13,8 @@ struct ctm_sprite_fireworks {
 
 #define SPR ((struct ctm_sprite_fireworks*)spr)
 
+#define CTM_FIREWORKS_SPEED ((CTM_TILESIZE*2)/16)
+
 /* Update.
  */
 
@@ -50,7 +52,7 @@ const struct ctm_sprtype ctm_sprtype_fireworks={
 
 static int ctm_fireworks_setup(struct ctm_sprite *spr,int dx,int dy) {
   SPR->ttl=40;
-  SPR->speed=2;
+  SPR->speed=CTM_FIREWORKS_SPEED;
   if (dx<0) { SPR->xweight=-dx; SPR->dx=-1; } else if (dx>0) { SPR->xweight=dx; SPR->dx=1; }
   if (dy<0) { SPR->yweight=dy; SPR->dy=-1; } else if (dy>0) { SPR->yweight=-dy; SPR->dy=1; }
   SPR->weight=(SPR->xweight+SPR->yweight)>>1;

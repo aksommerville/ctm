@@ -43,7 +43,11 @@
 /* Common defines.
  */
 
-#define CTM_TILESIZE 16
+#define CTM_TILESIZE 32
+
+// CTM_TILESIZE was originally fixed at 16.
+// This macro helps replace the magic numbers strewn all about our code.
+#define CTM_RESIZE(k) ((CTM_TILESIZE*(k))/16)
 
 struct ctm_bounds { int l,r,t,b; };
 struct ctm_rgb { uint8_t r,g,b; };

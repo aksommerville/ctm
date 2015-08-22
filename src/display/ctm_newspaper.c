@@ -40,16 +40,16 @@ static int ctm_generate_newspaper_1(GLuint texid_bg,GLuint texid_bits,int statei
   }
 
   { // Background...
-    if (ctm_draw_texture(0,0,256,256,texid_bg,0)<0) return -1;
+    if (ctm_draw_texture(0,0,CTM_RESIZE(256),CTM_RESIZE(256),texid_bg,0)<0) return -1;
   }
 
   { // Photo...
     struct ctm_vertex_tex *vtxv=ctm_video_vtxv_append(&ctm_shader_tex,4);
     if (!vtxv) return -1;
-    vtxv[0].x= 80; vtxv[0].y=124;
-    vtxv[1].x=208; vtxv[1].y=124;
-    vtxv[2].x= 80; vtxv[2].y= 60;
-    vtxv[3].x=208; vtxv[3].y= 60;
+    vtxv[0].x=CTM_RESIZE( 80); vtxv[0].y=CTM_RESIZE(124);
+    vtxv[1].x=CTM_RESIZE(208); vtxv[1].y=CTM_RESIZE(124);
+    vtxv[2].x=CTM_RESIZE( 80); vtxv[2].y=CTM_RESIZE( 60);
+    vtxv[3].x=CTM_RESIZE(208); vtxv[3].y=CTM_RESIZE( 60);
     switch (event) {
       case 0: vtxv[0].tx=0.0f; vtxv[0].ty=0.25f; break;
       case 1: vtxv[0].tx=0.5f; vtxv[0].ty=0.25f; break;
@@ -121,21 +121,21 @@ static int ctm_generate_newspaper_1(GLuint texid_bg,GLuint texid_bits,int statei
     namec=snprintf(name,sizeof(name),"%s %s",statename,papername);
     int msg1c=0; while (msg1[msg1c]) msg1c++;
     int msg2c=0; while (msg2[msg2c]) msg2c++;
-    if (ctm_video_begin_text(16)<0) return -1;
-    if (ctm_video_add_text(name,namec,129-namec*4,12,0x303030ff)<0) return -1;
+    if (ctm_video_begin_text(CTM_RESIZE(16))<0) return -1;
+    if (ctm_video_add_text(name,namec,CTM_RESIZE(129)-namec*CTM_RESIZE(4),CTM_RESIZE(12),0x303030ff)<0) return -1;
     if (msg2c) {
-      if (ctm_video_add_text(msg1,30,129-msg1c*4,34,0x303030ff)<0) return -1;
-      if (ctm_video_add_text(msg2,30,129-msg2c*4,50,0x303030ff)<0) return -1;
+      if (ctm_video_add_text(msg1,CTM_RESIZE(30),CTM_RESIZE(129)-msg1c*CTM_RESIZE(4),CTM_RESIZE(34),0x303030ff)<0) return -1;
+      if (ctm_video_add_text(msg2,CTM_RESIZE(30),CTM_RESIZE(129)-msg2c*CTM_RESIZE(4),CTM_RESIZE(50),0x303030ff)<0) return -1;
     } else {
-      if (ctm_video_add_text(msg1,30,129-msg1c*4,42,0x303030ff)<0) return -1;
+      if (ctm_video_add_text(msg1,CTM_RESIZE(30),CTM_RESIZE(129)-msg1c*CTM_RESIZE(4),CTM_RESIZE(42),0x303030ff)<0) return -1;
     }
     if (ctm_video_end_text(ctm_video.texid_font)<0) return -1;
   }
 
   { // Fancy blue and red bars by the paper's name.
-    int barw=(242-namec*8-10)>>1;
-    if (ctm_draw_rect(4,4,barw,16,0x707090ff)<0) return -1;
-    if (ctm_draw_rect(246-barw,4,barw,16,0x907070ff)<0) return -1;
+    int barw=(CTM_RESIZE(242)-namec*CTM_RESIZE(8)-CTM_RESIZE(10))>>1;
+    if (ctm_draw_rect(CTM_RESIZE(4),CTM_RESIZE(4),barw,CTM_RESIZE(16),0x707090ff)<0) return -1;
+    if (ctm_draw_rect(CTM_RESIZE(246)-barw,CTM_RESIZE(4),barw,CTM_RESIZE(16),0x907070ff)<0) return -1;
   }
   
   return 0;
@@ -158,13 +158,13 @@ GLuint ctm_generate_newspaper(int stateix,int party) {
   glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_LINEAR);
   glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_S,GL_CLAMP_TO_EDGE);
   glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_T,GL_CLAMP_TO_EDGE);
-  glTexImage2D(GL_TEXTURE_2D,0,GL_RGBA,256,256,0,GL_RGBA,GL_UNSIGNED_BYTE,0);
+  glTexImage2D(GL_TEXTURE_2D,0,GL_RGBA,CTM_RESIZE(256),CTM_RESIZE(256),0,GL_RGBA,GL_UNSIGNED_BYTE,0);
   GLuint fb=0;
   glGenFramebuffers(1,&fb);
   if (!fb) { glDeleteTextures(1,&texid); glDeleteTextures(1,&texid_bg); glDeleteTextures(1,&texid_bits); return 0; }
   glBindFramebuffer(GL_FRAMEBUFFER,fb);
   glFramebufferTexture2D(GL_FRAMEBUFFER,GL_COLOR_ATTACHMENT0,GL_TEXTURE_2D,texid,0);
-  ctm_video_set_uniform_screen_size(256,256);
+  ctm_video_set_uniform_screen_size(CTM_RESIZE(256),CTM_RESIZE(256));
 
   int err=ctm_generate_newspaper_1(texid_bg,texid_bits,stateix,party);
 

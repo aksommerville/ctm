@@ -10,6 +10,8 @@
 #define CTM_COP_GUN_MAX 240
 #define CTM_COP_RECOIL_TIME 40
 #define CTM_COP_BULLET_TTL 100
+#define CTM_COP_WALK_SPEED ((CTM_TILESIZE*1)/16)
+#define CTM_COP_BULLET_SPEED ((CTM_TILESIZE*3)/16)
 
 int ctm_missile_add_ttl(struct ctm_sprite *spr,int ttl);
 
@@ -93,9 +95,13 @@ static int _ctm_cop_update(struct ctm_sprite *spr) {
   }
 
   // Move.
-  spr->x+=SPR->dx;
-  spr->y+=SPR->dy;
-  if (ctm_cop_bad_position(spr)) { spr->x-=SPR->dx; spr->y-=SPR->dy; SPR->reassess=0; }
+  spr->x+=SPR->dx*CTM_COP_WALK_SPEED;
+  spr->y+=SPR->dy*CTM_COP_WALK_SPEED;
+  if (ctm_cop_bad_position(spr)) { 
+    spr->x-=SPR->dx*CTM_COP_WALK_SPEED; 
+    spr->y-=SPR->dy*CTM_COP_WALK_SPEED; 
+    SPR->reassess=0; 
+  }
 
   // Shoot.
   if (--(SPR->guncounter)<=0) {
@@ -103,7 +109,7 @@ static int _ctm_cop_update(struct ctm_sprite *spr) {
     SPR->guncounter=CTM_COP_GUN_MIN+rand()%(CTM_COP_GUN_MAX-CTM_COP_GUN_MIN+1);
     spr->tile=0xc0|(spr->tile&0x0f);
     SPR->recoil=CTM_COP_RECOIL_TIME;
-    struct ctm_sprite *bullet=ctm_sprite_missile_new(spr,0xd0|(spr->tile&0x0f),SPR->dx*3,SPR->dy*3);
+    struct ctm_sprite *bullet=ctm_sprite_missile_new(spr,0xd0|(spr->tile&0x0f),SPR->dx*CTM_COP_BULLET_SPEED,SPR->dy*CTM_COP_BULLET_SPEED);
     if (!bullet) return -1;
     bullet->flop=spr->flop;
     ctm_missile_add_ttl(bullet,CTM_COP_BULLET_TTL);

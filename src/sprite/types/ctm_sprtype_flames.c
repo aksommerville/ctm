@@ -13,6 +13,7 @@ struct ctm_sprite_flames {
 
 #define CTM_FLAMES_DISTANCE (CTM_TILESIZE*1.5) // pixels
 #define CTM_FLAMES_SPEED   0.10 // radians
+#define CTM_FLAMES_RADIUS ((CTM_TILESIZE*6)/16)
 
 /* Delete.
  */
@@ -47,7 +48,7 @@ static int _ctm_flames_update(struct ctm_sprite *spr) {
   if (SPR->t>M_PI*2.0) SPR->t-=M_PI*2.0;
   ctm_flames_reposition(spr);
 
-  int l=spr->x-6,r=spr->x+6,t=spr->y-6,b=spr->y+6;
+  int l=spr->x-CTM_FLAMES_RADIUS,r=spr->x+CTM_FLAMES_RADIUS,t=spr->y-CTM_FLAMES_RADIUS,b=spr->y+CTM_FLAMES_RADIUS;
   int i; for (i=0;i<ctm_group_fragile.sprc;i++) {
     struct ctm_sprite *qspr=ctm_group_fragile.sprv[i];
     if (qspr==SPR->owner) continue;

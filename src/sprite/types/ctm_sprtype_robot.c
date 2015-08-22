@@ -34,7 +34,11 @@ struct ctm_sprite_robot {
 #define CTM_ROBOT_RELOAD_MIN 100 // Time spent after firing, displaying empty chamber.
 #define CTM_ROBOT_RELOAD_MAX 150
 
-#define CTM_ROBOT_MISSILE_SPEED 4
+#define CTM_ROBOT_MISSILE_SPEED ((CTM_TILESIZE*4)/16)
+#define CTM_ROBOT_WALK_SPEED_LIMIT ((CTM_TILESIZE*2)/16)
+
+#define CTM_ROBOT_HEADX_LO ((CTM_TILESIZE*-2)/16)
+#define CTM_ROBOT_HEADX_HI ((CTM_TILESIZE*3)/16)
 
 /* Delete.
  */
@@ -119,8 +123,8 @@ static int _ctm_robot_update(struct ctm_sprite *spr) {
   if (++(SPR->headclock)>=3) {
     SPR->headclock=0;
     SPR->headx+=SPR->headdx;
-    if (SPR->headx<-2) { SPR->headx=-2; SPR->headdx=1; }
-    else if (SPR->headx>3) { SPR->headx=3; SPR->headdx=-1; }
+    if (SPR->headx<CTM_ROBOT_HEADX_LO) { SPR->headx=CTM_ROBOT_HEADX_LO; SPR->headdx=1; }
+    else if (SPR->headx>CTM_ROBOT_HEADX_HI) { SPR->headx=CTM_ROBOT_HEADX_HI; SPR->headdx=-1; }
   }
 
   // Animate blades.
@@ -137,7 +141,8 @@ static int _ctm_robot_update(struct ctm_sprite *spr) {
     else if (spr->x>SPR->xhi) { spr->x=SPR->xhi; SPR->dxttl=0; }
   } else {
     SPR->dxttl=CTM_ROBOT_DXTTL_MIN+rand()%(CTM_ROBOT_DXTTL_MAX-CTM_ROBOT_DXTTL_MIN+1);
-    SPR->dx=rand()%5-2;
+    SPR->dx=rand()%CTM_ROBOT_WALK_SPEED_LIMIT+1;
+    if (rand()&1) SPR->dx=-SPR->dx;
   }
 
   // Missiles.

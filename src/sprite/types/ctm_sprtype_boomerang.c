@@ -16,9 +16,9 @@ struct ctm_sprite_boomerang {
 #define SPR ((struct ctm_sprite_boomerang*)spr)
 
 #define CTM_BOOMERANG_FRAME_TIME 5
-#define CTM_BOOMERANG_SPEED 3
+#define CTM_BOOMERANG_SPEED ((CTM_TILESIZE*3)/16)
 #define CTM_BOOMERANG_COUNTER_LIMIT 40
-#define CTM_BOOMERANG_RADIUS 6
+#define CTM_BOOMERANG_RADIUS ((CTM_TILESIZE*6)/16)
 #define CTM_BOOMERANG_GRABPOISON 8
 
 /* Delete.

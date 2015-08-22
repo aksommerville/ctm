@@ -25,9 +25,15 @@ struct ctm_sprite_buffalo {
 
 #define SPR ((struct ctm_sprite_buffalo*)spr)
 
-#define CTM_BUFFALO_EXTENSION_LIMIT 80
+#define CTM_BUFFALO_EXTENSION_LIMIT ((CTM_TILESIZE*80)/16)
 #define CTM_BUFFALO_WAIT_MIN  60
 #define CTM_BUFFALO_WAIT_MAX 180
+#define CTM_BUFFALO_LINKC_ADD ((CTM_TILESIZE*15)/16)
+#define CTM_BUFFALO_LINKC_DIVIDE ((CTM_TILESIZE*8)/16)
+#define CTM_BUFFALO_EXTENSION_SPEED_PROJECT ((CTM_TILESIZE*2)/16)
+#define CTM_BUFFALO_EXTENSION_SPEED_RETURN ((CTM_TILESIZE*-1)/16)
+#define CTM_BUFFALO_HURT_RADIUS ((CTM_TILESIZE*8)/16)
+#define CTM_BUFFALO_VERTICAL_SPEED ((CTM_TILESIZE*1)/16)
 
 /* Delete.
  */
@@ -41,7 +47,7 @@ static void _ctm_buffalo_del(struct ctm_sprite *spr) {
 static int _ctm_buffalo_draw(struct ctm_sprite *spr,int addx,int addy) {
 
   int linkc=0;
-  if (SPR->extension) linkc=(SPR->extension+15)/8;
+  if (SPR->extension) linkc=(SPR->extension+CTM_BUFFALO_LINKC_ADD)/CTM_BUFFALO_LINKC_DIVIDE;
   int vtxc=linkc+2;
   struct ctm_vertex_sprite *vtxv=ctm_add_sprites(vtxc);
   if (!vtxv) return -1;
@@ -108,18 +114,18 @@ static int _ctm_buffalo_update(struct ctm_sprite *spr) {
     SPR->extension+=SPR->dextension;
     if (SPR->extension>=CTM_BUFFALO_EXTENSION_LIMIT) {
       SPR->extension=CTM_BUFFALO_EXTENSION_LIMIT;
-      SPR->dextension=-1;
+      SPR->dextension=CTM_BUFFALO_EXTENSION_SPEED_RETURN;
     } else if (SPR->extension<0) {
       SPR->extension=0;
       SPR->dextension=0;
     }
   } else if (--(SPR->extensionclock)<=0) {
     CTM_SFX(HOOKSHOT_BEGIN)
-    SPR->dextension=2;
+    SPR->dextension=CTM_BUFFALO_EXTENSION_SPEED_PROJECT;
     SPR->extensionclock=CTM_BUFFALO_WAIT_MIN+rand()%(CTM_BUFFALO_WAIT_MAX-CTM_BUFFALO_WAIT_MIN+1);
   }
 
-  spr->y+=SPR->dy;
+  spr->y+=SPR->dy*CTM_BUFFALO_VERTICAL_SPEED;
   if (spr->y<SPR->ylo) { spr->y=SPR->ylo; if (SPR->dy<0) SPR->dy=-SPR->dy; }
   else if (spr->y>SPR->yhi) { spr->y=SPR->yhi; if (SPR->dy>0) SPR->dy=-SPR->dy; }
 
@@ -128,11 +134,11 @@ static int _ctm_buffalo_update(struct ctm_sprite *spr) {
     struct ctm_sprite *player=ctm_group_player.sprv[i];
     if (player->interior!=spr->interior) continue;
     int dx=player->x-exx;
-    if (dx<-8) continue;
-    if (dx>8) continue;
+    if (dx<-CTM_BUFFALO_HURT_RADIUS) continue;
+    if (dx>CTM_BUFFALO_HURT_RADIUS) continue;
     int dy=player->y-spr->y;
-    if (dy<-8) continue;
-    if (dy>8) continue;
+    if (dy<-CTM_BUFFALO_HURT_RADIUS) continue;
+    if (dy>CTM_BUFFALO_HURT_RADIUS) continue;
     if (ctm_sprite_hurt(player,spr)<0) return -1;
   }
 

@@ -10,6 +10,7 @@
 #define CTM_BEAST_DELAY_MIN 10
 #define CTM_BEAST_DELAY_MAX 50
 #define CTM_BEAST_TTL 180 // must be away from players for so long before we delete
+#define CTM_BEAST_WALK_SPEED ((CTM_TILESIZE*1)/16)
 
 struct ctm_sprite_beast {
   struct ctm_sprite hdr;
@@ -77,8 +78,8 @@ static int _ctm_beast_update(struct ctm_sprite *spr) {
   } else if (SPR->dx||SPR->dy) {
     if (SPR->linger++>=1) {
       SPR->linger=0;
-      spr->x+=SPR->dx;
-      spr->y+=SPR->dy;
+      spr->x+=SPR->dx*CTM_BEAST_WALK_SPEED;
+      spr->y+=SPR->dy*CTM_BEAST_WALK_SPEED;
       int stop=0;
       if (SPR->dx&&(spr->x%CTM_TILESIZE==CTM_TILESIZE>>1)) stop=1;
       if (SPR->dy&&(spr->y%CTM_TILESIZE==CTM_TILESIZE>>1)) stop=1;

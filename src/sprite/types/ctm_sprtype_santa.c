@@ -26,8 +26,22 @@ struct ctm_sprite_santa {
 
 #define SPR ((struct ctm_sprite_santa*)spr)
 
+#define CTM_SANTA_HEAD_Y_ADJUST ((CTM_TILESIZE*10)/16)
+#define CTM_SANTA_GIFT_RADIUS_LO ((CTM_TILESIZE*20.0)/16.0)
+#define CTM_SANTA_GIFT_RADIUS_HI ((CTM_TILESIZE*60.0)/16.0)
+#define CTM_SANTA_WALK_SPEED ((CTM_TILESIZE*1)/16)
+#define CTM_SANTA_COLLISION_RADIUS ((CTM_TILESIZE*8)/16)
+
 // Half of a parabolic curve, precalculated for efficiency:
-static const int8_t ctm_bounce_offsets[30]={0,0,1,1,1,2,2,3,3,3,3,4,4,4,4,5,5,5,5,5,5,6,6,6,6,6,6,6,6,6};
+#if CTM_TILESIZE==16
+  static const int8_t ctm_bounce_offsets[30]={0,0,1,1,1,2,2,3,3,3,3,4,4,4,4,5,5,5,5,5,5,6,6,6,6,6,6,6,6,6};
+#elif CTM_TILESIZE==32
+  static const int8_t ctm_bounce_offsets[30]={0,1,2,2,3,4,4,5,5,6,6,7,7,8,8,9,9,9,10,10,10,11,11,11,12,12,12,12,12,12};
+#elif CTM_TILESIZE==64
+  static const int8_t ctm_bounce_offsets[30]={0,1,2,4,6,8,8,10,10,12,12,14,14,16,16,18,18,18,20,20,20,22,22,22,24,24,24,24,24,24};
+#else
+  #error "Please precalculate Santa's bounce curve."
+#endif
 
 /* Delete.
  */
@@ -61,7 +75,7 @@ static int _ctm_santa_draw(struct ctm_sprite *spr,int addx,int addy) {
   vtxv[bodyp].tile=0x19;
 
   vtxv[headp].x=spr->x+addx;
-  vtxv[headp].y=spr->y+addy-10;
+  vtxv[headp].y=spr->y+addy-CTM_SANTA_HEAD_Y_ADJUST;
   vtxv[headp].tile=0x09;
 
   // Head bounces up and down for no reason at all.
@@ -126,13 +140,13 @@ static int _ctm_santa_update(struct ctm_sprite *spr) {
   // Move gift and sample its new position.
   SPR->giftt+=SPR->giftdt; if (SPR->giftt>M_PI*2.0) SPR->giftt-=M_PI*2.0;
   SPR->giftr+=SPR->giftdr;
-  if ((SPR->giftr>60.0)&&(SPR->giftdr>0.0)) SPR->giftdr=-SPR->giftdr;
-  else if ((SPR->giftr<20.0)&&(SPR->giftdr<0.0)) SPR->giftdr=-SPR->giftdr;
+  if ((SPR->giftr>CTM_SANTA_GIFT_RADIUS_HI)&&(SPR->giftdr>0.0)) SPR->giftdr=-SPR->giftdr;
+  else if ((SPR->giftr<CTM_SANTA_GIFT_RADIUS_LO)&&(SPR->giftdr<0.0)) SPR->giftdr=-SPR->giftdr;
   SPR->giftx=cos(SPR->giftt)*SPR->giftr;
   SPR->gifty=sin(SPR->giftt)*SPR->giftr;
 
   // Horizontal position just runs back and forth. Limits are premeasured.
-  spr->x+=SPR->dx;
+  spr->x+=SPR->dx*CTM_SANTA_WALK_SPEED;
   if (spr->x<SPR->xlo) { spr->x=SPR->xlo; if (SPR->dx<0) SPR->dx=-SPR->dx; }
   else if (spr->x>SPR->xhi) { spr->x=SPR->xhi; if (SPR->dx>0) SPR->dx=-SPR->dx; }
 
@@ -141,11 +155,11 @@ static int _ctm_santa_update(struct ctm_sprite *spr) {
     struct ctm_sprite *player=ctm_group_player.sprv[i];
     if (player->interior!=spr->interior) continue;
     int dx=player->x-(spr->x+SPR->giftx);
-    if (dx<-8) continue;
-    if (dx>8) continue;
+    if (dx<-CTM_SANTA_COLLISION_RADIUS) continue;
+    if (dx>CTM_SANTA_COLLISION_RADIUS) continue;
     int dy=player->y-(spr->y+SPR->gifty);
-    if (dy<-8) continue;
-    if (dy>8) continue;
+    if (dy<-CTM_SANTA_COLLISION_RADIUS) continue;
+    if (dy>CTM_SANTA_COLLISION_RADIUS) continue;
     if (ctm_sprite_hurt(player,spr)<0) return -1;
   }
   
@@ -204,7 +218,7 @@ static int _ctm_santa_init(struct ctm_sprite *spr) {
   SPR->hp=5;
   SPR->dx=1;
   SPR->giftt=0.0;
-  SPR->giftr=40.0;
+  SPR->giftr=(CTM_SANTA_GIFT_RADIUS_LO+CTM_SANTA_GIFT_RADIUS_HI)/2.0;
   SPR->giftdt=0.07;
   SPR->giftdr=0.20;
   return 0;

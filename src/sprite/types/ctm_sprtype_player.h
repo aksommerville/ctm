@@ -95,9 +95,9 @@ int ctm_player_end_action(struct ctm_sprite *spr,int item);
 int ctm_player_abort_actions(struct ctm_sprite *spr);
 int ctm_player_add_wanted(struct ctm_sprite *spr,int amount);
 
-#define CTM_PLAYER_PHLEFT (-6)
-#define CTM_PLAYER_PHRIGHT 6
-#define CTM_PLAYER_PHTOP (-6)
-#define CTM_PLAYER_PHBOTTOM 8
+#define CTM_PLAYER_PHLEFT ((CTM_TILESIZE*-6)/16)
+#define CTM_PLAYER_PHRIGHT ((CTM_TILESIZE*6)/16)
+#define CTM_PLAYER_PHTOP ((CTM_TILESIZE*-6)/16)
+#define CTM_PLAYER_PHBOTTOM ((CTM_TILESIZE*8)/16)
 
 #endif

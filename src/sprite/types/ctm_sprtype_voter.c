@@ -17,6 +17,8 @@
 
 #define SPR ((struct ctm_sprite_voter*)spr)
 
+#define CTM_VOTER_HEAD_Y_ADJUST ((CTM_TILESIZE*12)/16)
+
 /* Delete and initialize.
  */
 
@@ -59,8 +61,8 @@ static int _ctm_voter_draw(struct ctm_sprite *spr,int addx,int addy) {
   _ctm_voter_vtx(vtxv+0,x,y,SPR->bodytile,SPR->skincolor);
   _ctm_voter_vtx(vtxv+1,x,y,SPR->trouserstile,SPR->trouserscolor);
   _ctm_voter_vtx(vtxv+2,x,y,SPR->shirttile,SPR->shirtcolor);
-  _ctm_voter_vtx(vtxv+3,x,y-12,SPR->headtile,SPR->skincolor);
-  _ctm_voter_vtx(vtxv+4,x,y-12,SPR->hairtile,SPR->haircolor);
+  _ctm_voter_vtx(vtxv+3,x,y-CTM_VOTER_HEAD_Y_ADJUST,SPR->headtile,SPR->skincolor);
+  _ctm_voter_vtx(vtxv+4,x,y-CTM_VOTER_HEAD_Y_ADJUST,SPR->hairtile,SPR->haircolor);
 
   uint8_t a=0x00,r,g,b;
   if (SPR->numb<0) {

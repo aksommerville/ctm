@@ -108,7 +108,7 @@ struct ctm_sprite *ctm_sprite_fireball_new(struct ctm_sprite *owner,uint8_t tile
     if (ctm_sprite_add_group(spr,&ctm_group_interior)<0) return 0;
   }
   spr->tile=tile;
-  SPR->speed=1;
+  SPR->speed=((CTM_TILESIZE*1)/16);
   
   return spr;
 }

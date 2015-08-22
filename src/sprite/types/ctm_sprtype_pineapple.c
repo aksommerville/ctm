@@ -33,7 +33,10 @@ struct ctm_sprite_pineapple {
 #define CTM_PINEAPPLE_PREWAIT     20
 #define CTM_PINEAPPLE_POSTWAIT    20
 
-#define CTM_PINEAPPLE_SPEED 1
+#define CTM_PINEAPPLE_SPEED ((CTM_TILESIZE*1)/16)
+
+#define CTM_PINEAPPLE_EXTRUSIONS_OFFSET_X ((CTM_TILESIZE*0)/16)
+#define CTM_PINEAPPLE_EXTRUSIONS_OFFSET_Y ((CTM_TILESIZE*5)/16)
 
 /* Delete.
  */
@@ -65,8 +68,8 @@ static int _ctm_pineapple_draw(struct ctm_sprite *spr,int addx,int addy) {
 
   if (!SPR->waitclock) {
     vtxv[1].tile=SPR->animframe?0x4a:0x4b;
-    vtxv[1].x=spr->x+addx;
-    vtxv[1].y=spr->y+addy+5;
+    vtxv[1].x=spr->x+addx+CTM_PINEAPPLE_EXTRUSIONS_OFFSET_X;
+    vtxv[1].y=spr->y+addy+CTM_PINEAPPLE_EXTRUSIONS_OFFSET_Y;
   }
 
   return 0;

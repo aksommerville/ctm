@@ -242,7 +242,7 @@ int ctm_video_add_text(const char *src,int srcc,int x,int y,uint32_t rgba) {
   if (!vtxv) return -1;
   uint8_t r=rgba>>24,g=rgba>>16,b=rgba>>8,a=rgba;
   int i; for (i=0;i<srcc;i++) {
-    vtxv[i].x=x; x+=8;
+    vtxv[i].x=x; x+=CTM_RESIZE(8);
     vtxv[i].y=y;
     if (src[i]&0x80) vtxv[i].tile='?'; else vtxv[i].tile=src[i];
     vtxv[i].r=r;

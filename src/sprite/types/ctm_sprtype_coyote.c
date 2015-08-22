@@ -25,6 +25,9 @@ struct ctm_sprite_coyote {
 #define CTM_COYOTE_COLOR_2 0xffc000
 #define CTM_COYOTE_COLOR_3 0xff2040
 
+#define CTM_COYOTE_COLLISION_RADIUS ((CTM_TILESIZE*6)/16)
+#define CTM_COYOTE_WALK_SPEED ((CTM_TILESIZE*1)/16)
+
 /* Delete.
  */
 
@@ -35,10 +38,10 @@ static void _ctm_coyote_del(struct ctm_sprite *spr) {
  */
 
 static int ctm_coyote_collision(struct ctm_sprite *spr) {
-  int cola=(spr->x-6)/CTM_TILESIZE;
-  int colz=(spr->x+6)/CTM_TILESIZE;
-  int rowa=(spr->y-6)/CTM_TILESIZE;
-  int rowz=(spr->y+6)/CTM_TILESIZE;
+  int cola=(spr->x-CTM_COYOTE_COLLISION_RADIUS)/CTM_TILESIZE;
+  int colz=(spr->x+CTM_COYOTE_COLLISION_RADIUS)/CTM_TILESIZE;
+  int rowa=(spr->y-CTM_COYOTE_COLLISION_RADIUS)/CTM_TILESIZE;
+  int rowz=(spr->y+CTM_COYOTE_COLLISION_RADIUS)/CTM_TILESIZE;
   int row; for (row=rowa;row<=rowz;row++) {
     int col; for (col=cola;col<=colz;col++) {
       uint32_t prop=ctm_grid_tileprop_for_cell(col,row,spr->interior);
@@ -71,11 +74,11 @@ static int _ctm_coyote_update(struct ctm_sprite *spr) {
   }
 
   if (SPR->dx||SPR->dy) {
-    spr->x+=SPR->dx;
-    spr->y+=SPR->dy;
+    spr->x+=SPR->dx*CTM_COYOTE_WALK_SPEED;
+    spr->y+=SPR->dy*CTM_COYOTE_WALK_SPEED;
     if (ctm_coyote_collision(spr)) {
-      spr->x-=SPR->dx;
-      spr->y-=SPR->dy;
+      spr->x-=SPR->dx*CTM_COYOTE_WALK_SPEED;
+      spr->y-=SPR->dy*CTM_COYOTE_WALK_SPEED;
       SPR->dx=SPR->dy=0;
     } else if (SPR->dx&&!((spr->x-(CTM_TILESIZE>>1))%CTM_TILESIZE)) {
       SPR->dx=SPR->dy=0;

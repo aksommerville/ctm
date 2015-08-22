@@ -28,7 +28,15 @@ struct ctm_sprite_cthulhu {
 
 #define CTM_CTHULHU_FIRE_MIN 60
 #define CTM_CTHULHU_FIRE_MAX 180
-#define CTM_CTHULHU_FIRE_SPEED 4
+#define CTM_CTHULHU_FIRE_SPEED ((CTM_TILESIZE*4)/16)
+#define CTM_CTHULHU_WALK_SPEED ((CTM_TILESIZE*1)/16)
+
+#define CTM_CTHULHU_NECK_X_ADJUST ((CTM_TILESIZE*1)/16)
+#define CTM_CTHULHU_NECK1_Y_ADJUST ((CTM_TILESIZE*8)/16)
+#define CTM_CTHULHU_NECK2_Y_ADJUST ((CTM_TILESIZE*12)/16)
+#define CTM_CTHULHU_NECK2_ELEVATION_FACTOR ((CTM_TILESIZE*10)/16)
+#define CTM_CTHULHU_NECK3_Y_ADJUST ((CTM_TILESIZE*16)/16)
+#define CTM_CTHULHU_NECK3_ELEVATION_FACTOR ((CTM_TILESIZE*5)/16)
 
 /* Delete.
  */
@@ -57,16 +65,16 @@ static int _ctm_cthulhu_draw(struct ctm_sprite *spr,int addx,int addy) {
   vtxv[0].y=spr->y+addy;
   vtxv[0].tile=SPR->mouthopen?0x2f:0x1f;
 
-  vtxv[1].x=spr->x+addx+1;
-  vtxv[1].y=spr->y+addy-8;
+  vtxv[1].x=spr->x+addx+CTM_CTHULHU_NECK_X_ADJUST;
+  vtxv[1].y=spr->y+addy-CTM_CTHULHU_NECK1_Y_ADJUST;
   vtxv[1].tile=SPR->tentframe?0x1e:0x0e;
 
-  vtxv[2].x=spr->x+addx+1;
-  vtxv[2].y=spr->y+addy-12-SPR->elevation/10;
+  vtxv[2].x=spr->x+addx+CTM_CTHULHU_NECK_X_ADJUST;
+  vtxv[2].y=spr->y+addy-CTM_CTHULHU_NECK2_Y_ADJUST-SPR->elevation/CTM_CTHULHU_NECK2_ELEVATION_FACTOR;
   vtxv[2].tile=SPR->tentframe?0x0e:0x1e;
 
-  vtxv[3].x=spr->x+addx+1;
-  vtxv[3].y=spr->y+addy-16-SPR->elevation/5;
+  vtxv[3].x=spr->x+addx+CTM_CTHULHU_NECK_X_ADJUST;
+  vtxv[3].y=spr->y+addy-CTM_CTHULHU_NECK3_Y_ADJUST-SPR->elevation/CTM_CTHULHU_NECK3_ELEVATION_FACTOR;
   vtxv[3].tile=0x0f;
 
   return 0;
@@ -107,7 +115,7 @@ static int _ctm_cthulhu_update(struct ctm_sprite *spr) {
   else if (SPR->elevation>29) { SPR->elevation=29; SPR->delevation=-1; }
 
   // Walk up and down.
-  spr->y+=SPR->dy;
+  spr->y+=SPR->dy*CTM_CTHULHU_WALK_SPEED;
   if (spr->y<SPR->ylo) { spr->y=SPR->ylo; if (SPR->dy<0) SPR->dy=-SPR->dy; }
   else if (spr->y>SPR->yhi) { spr->y=SPR->yhi; if (SPR->dy>0) SPR->dy=-SPR->dy; }
 

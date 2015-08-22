@@ -214,16 +214,21 @@ static void ctm_display_game_draw_wanted_level(int x,int y,int w,int h,int wante
   }
 }
 
+#define CTM_DISPK_WANTEDL ((CTM_TILESIZE*88)/16)
+#define CTM_DISPK_WANTEDR ((CTM_TILESIZE*40)/16)
+#define CTM_DISPK_WANTEDW ((CTM_TILESIZE*50)/16)
+#define CTM_DISPK_ITEM ((CTM_TILESIZE*24)/16)
+
 static int ctm_display_game_draw_overlay_sprites(struct ctm_display *display,struct ctm_sprite_player *SPR) {
   int i;
 
   /* Draw wanted level (not a "sprite" but it had to go somewhere). */
-  int wantedl=88+CTM_TILESIZE*SPR->hpmax;
-  int wantedr=display->fbw-40-CTM_TILESIZE;
+  int wantedl=CTM_DISPK_WANTEDL+CTM_TILESIZE*SPR->hpmax;
+  int wantedr=display->fbw-CTM_DISPK_WANTEDR-CTM_TILESIZE;
   int wantedw=wantedr-wantedl;
-  if (wantedw>=50) {
-    int wantedy=CTM_TILESIZE+4;
-    int wantedh=CTM_TILESIZE-8;
+  if (wantedw>=CTM_DISPK_WANTEDW) {
+    int wantedy=CTM_TILESIZE+CTM_RESIZE(4);
+    int wantedh=CTM_TILESIZE-CTM_RESIZE(8);
     int wanted=SPR->wanted[ctm_state_for_pixel(SPR->hdr.x,SPR->hdr.y)];
     ctm_display_game_draw_wanted_level(wantedl,wantedy,wantedw,wantedh,wanted);
   } else {
@@ -246,16 +251,16 @@ static int ctm_display_game_draw_overlay_sprites(struct ctm_display *display,str
   }
 
   ctm_display_game_draw_equipped_item(vtxv+ 0,SPR->item_primary,0,0);
-  ctm_display_game_draw_equipped_item(vtxv+10,SPR->item_secondary,24,0);
-  ctm_display_game_draw_equipped_item(vtxv+20,SPR->item_tertiary,48,0);
+  ctm_display_game_draw_equipped_item(vtxv+10,SPR->item_secondary,CTM_DISPK_ITEM,0);
+  ctm_display_game_draw_equipped_item(vtxv+20,SPR->item_tertiary,CTM_DISPK_ITEM*2,0);
 
-  vtxv[30].x=88;
+  vtxv[30].x=CTM_DISPK_WANTEDL;
   vtxv[30].y=CTM_TILESIZE>>1;
   vtxv[30].tile=0xe4;
 
   for (i=0;i<SPR->hpmax;i++) {
     struct ctm_vertex_sprite *vtx=vtxv+31+i;
-    vtx->x=88+CTM_TILESIZE*i;
+    vtx->x=CTM_DISPK_WANTEDL+CTM_TILESIZE*i;
     vtx->y=CTM_TILESIZE+(CTM_TILESIZE>>1);
     vtx->tile=(i<SPR->hp)?0x24:0x25;
   }
@@ -267,31 +272,34 @@ static int ctm_display_game_draw_overlay_sprites(struct ctm_display *display,str
 /* Draw overlay text. Coin count, location name, item counts, clock.
  */
 
+#define CTM_DISPK_COINHORZ ((CTM_TILESIZE*104)/16)
+#define CTM_DISPK_TIMEHORZ ((CTM_TILESIZE*40)/16)
+
 static int ctm_display_game_draw_overlay_text(struct ctm_display *display,struct ctm_sprite_player *SPR) {
   const struct ctm_state_data *state=ctm_state_data+ctm_state_for_pixel(SPR->hdr.x,SPR->hdr.y);
   
-  if (ctm_video_begin_text(16)<0) return -1;
+  if (ctm_video_begin_text(CTM_TILESIZE)<0) return -1;
 
-  if (ctm_video_add_textf(104,CTM_TILESIZE>>1,0xffffffff,"%d",SPR->inventory[CTM_ITEM_COIN])<0) return -1;
+  if (ctm_video_add_textf(CTM_DISPK_COINHORZ,CTM_TILESIZE>>1,0xffffffff,"%d",SPR->inventory[CTM_ITEM_COIN])<0) return -1;
   if (state->name) {
     int namec=0; while (state->name[namec]) namec++;
-    if (ctm_video_add_text(state->name,namec,display->fbw-namec*8,CTM_TILESIZE>>1,0xffffffff)<0) return -1;
+    if (ctm_video_add_text(state->name,namec,display->fbw-namec*(CTM_TILESIZE>>1),CTM_TILESIZE>>1,0xffffffff)<0) return -1;
   }
-  if (ctm_video_add_textf(display->fbw-40,CTM_TILESIZE+(CTM_TILESIZE>>1),0xffffffff,
+  if (ctm_video_add_textf(display->fbw-CTM_DISPK_TIMEHORZ,CTM_TILESIZE+(CTM_TILESIZE>>1),0xffffffff,
     "%02d%c%02d",ctm_game.time_remaining.min,(ctm_game.time_remaining.cs<80)?':':' ',ctm_game.time_remaining.s
   )<0) return -1;
   
   if (ctm_video_end_text(ctm_video.texid_font)<0) return -1;
 
-  if (ctm_video_begin_text(12)<0) return -1;
+  if (ctm_video_begin_text(CTM_RESIZE(12))<0) return -1;
   if (SPR->inventory[SPR->item_primary]!=CTM_INVENTORY_UNLIMITED) {
-    if (ctm_video_add_textf_centered(3,28,24,0,0xffff00ff,"%d",SPR->inventory[SPR->item_primary])<0) return -1;
+    if (ctm_video_add_textf_centered(CTM_RESIZE(3),CTM_RESIZE(28),CTM_RESIZE(24),0,0xffff00ff,"%d",SPR->inventory[SPR->item_primary])<0) return -1;
   }
   if (SPR->inventory[SPR->item_secondary]!=CTM_INVENTORY_UNLIMITED) {
-    if (ctm_video_add_textf_centered(27,28,24,0,0xffff00ff,"%d",SPR->inventory[SPR->item_secondary])<0) return -1;
+    if (ctm_video_add_textf_centered(CTM_RESIZE(27),CTM_RESIZE(28),CTM_RESIZE(24),0,0xffff00ff,"%d",SPR->inventory[SPR->item_secondary])<0) return -1;
   }
   if (SPR->inventory[SPR->item_tertiary]!=CTM_INVENTORY_UNLIMITED) {
-    if (ctm_video_add_textf_centered(51,28,24,0,0xffff00ff,"%d",SPR->inventory[SPR->item_tertiary])<0) return -1;
+    if (ctm_video_add_textf_centered(CTM_RESIZE(51),CTM_RESIZE(28),CTM_RESIZE(24),0,0xffff00ff,"%d",SPR->inventory[SPR->item_tertiary])<0) return -1;
   }
   if (ctm_video_end_text(ctm_video.texid_tinyfont)<0) return -1;
   
@@ -363,7 +371,7 @@ static int ctm_display_game_draw_item_store(struct ctm_display *display,struct c
   if (ctm_video_end_sprites(ctm_video.texid_sprites)<0) return -1;
 
   // Draw item quantities.
-  if (ctm_video_begin_text(12)<0) return -1;
+  if (ctm_video_begin_text(CTM_RESIZE(12))<0) return -1;
   for (i=0;i<16;i++) {
     int itemid=SPR->item_store[i];
     int inventory=SPR->inventory[itemid];
@@ -371,7 +379,7 @@ static int ctm_display_game_draw_item_store(struct ctm_display *display,struct c
     int col=i%DISPLAY->itemstore_colc;
     int row=i/DISPLAY->itemstore_colc;
     int x=storex+(col*CTM_TILESIZE*2);
-    int y=storey+(row*CTM_TILESIZE*2)+10;
+    int y=storey+(row*CTM_TILESIZE*2)+CTM_RESIZE(10);
     if (ctm_video_add_textf_centered(x,y,0,0,0xffff00ff,"%d",inventory)<0) return -1;
   }
   if (ctm_video_end_text(ctm_video.texid_tinyfont)<0) return -1;
@@ -441,18 +449,23 @@ static int ctm_display_game_draw_WINLOSE(struct ctm_display *display,struct ctm_
 
 static int ctm_display_game_draw_final_stats(struct ctm_display *display,struct ctm_sprite_player *SPR,uint8_t fgalpha,int y) {
 
-  if (ctm_video_begin_text(16)<0) return -1;
-  if (ctm_video_add_textf_centered(0,y,display->fbw,16,0xffffff00|fgalpha,"        Deaths: %-4d",SPR->deaths)<0) return -1; y+=16;
-  if (ctm_video_add_textf_centered(0,y,display->fbw,16,0xffffff00|fgalpha,"Mummies killed: %-4d",SPR->mummykills)<0) return -1; y+=16;
-  if (ctm_video_add_textf_centered(0,y,display->fbw,16,0xffffff00|fgalpha," Bosses killed: %-4d",SPR->bosskills)<0) return -1; y+=16;
-  if (ctm_video_add_textf_centered(0,y,display->fbw,16,0xffffff00|fgalpha," Voters killed: %-4d",SPR->voterkills)<0) return -1; y+=16;
-  if (ctm_video_add_textf_centered(0,y,display->fbw,16,0xffffff00|fgalpha,"   Other kills: %-4d",SPR->beastkills+SPR->copkills)<0) return -1; y+=16;
+  if (ctm_video_begin_text(CTM_RESIZE(16))<0) return -1;
+  if (ctm_video_add_textf_centered(0,y,display->fbw,CTM_RESIZE(16),0xffffff00|fgalpha,"        Deaths: %-4d",SPR->deaths)<0) return -1; 
+  y+=CTM_RESIZE(16);
+  if (ctm_video_add_textf_centered(0,y,display->fbw,CTM_RESIZE(16),0xffffff00|fgalpha,"Mummies killed: %-4d",SPR->mummykills)<0) return -1; 
+  y+=CTM_RESIZE(16);
+  if (ctm_video_add_textf_centered(0,y,display->fbw,CTM_RESIZE(16),0xffffff00|fgalpha," Bosses killed: %-4d",SPR->bosskills)<0) return -1;
+  y+=CTM_RESIZE(16);
+  if (ctm_video_add_textf_centered(0,y,display->fbw,CTM_RESIZE(16),0xffffff00|fgalpha," Voters killed: %-4d",SPR->voterkills)<0) return -1; 
+  y+=CTM_RESIZE(16);
+  if (ctm_video_add_textf_centered(0,y,display->fbw,CTM_RESIZE(16),0xffffff00|fgalpha,"   Other kills: %-4d",SPR->beastkills+SPR->copkills)<0) return -1; 
+  y+=CTM_RESIZE(16);
   
   const char *awardname=ctm_award_name[SPR->award&15];
   int awardnamec=0; while (awardname[awardnamec]) awardnamec++;
-  int contentw=16+4+awardnamec*8;
+  int contentw=CTM_RESIZE(16+4)+awardnamec*CTM_RESIZE(8);
   int x=(display->fbw>>1)-(contentw>>1);
-  if (ctm_video_add_text(awardname,awardnamec,x+16,y+8,0xffff0000|fgalpha)<0) return -1;
+  if (ctm_video_add_text(awardname,awardnamec,x+CTM_RESIZE(16),y+CTM_RESIZE(8),0xffff0000|fgalpha)<0) return -1;
 
   if (ctm_video_end_text(ctm_video.texid_font)<0) return -1;
 
@@ -460,7 +473,7 @@ static int ctm_display_game_draw_final_stats(struct ctm_display *display,struct 
   struct ctm_vertex_sprite *vtxv=ctm_add_sprites(1);
   if (!vtxv) return -1;
   vtxv->x=x;
-  vtxv->y=y+8;
+  vtxv->y=y+CTM_RESIZE(8);
   vtxv->tile=0xa0+SPR->award;
   vtxv->r=vtxv->g=vtxv->b=0x80;
   vtxv->a=fgalpha;
@@ -481,14 +494,14 @@ static int ctm_display_game_draw_pregameover(struct ctm_display *display,struct 
   uint8_t fgalpha=(age<100)?((age*0xff)/100):0xff;
   if (ctm_draw_rect(0,0,display->fbw,display->fbh,0x00000000|bgalpha)<0) return -1;
 
-  int contenth=(CTM_TILESIZE*2)+10+(16*6);
+  int contenth=(CTM_TILESIZE*2)+CTM_RESIZE(10)+(CTM_RESIZE(16)*6);
   int y0=(display->fbh>>1)-(contenth>>1);
 
   if (SPR&&ctm_game.result) {
     if (ctm_display_game_draw_WINLOSE(display,SPR,fgalpha,y0)<0) return -1;
   }
   if (SPR) {
-    if (ctm_display_game_draw_final_stats(display,SPR,fgalpha,y0+(CTM_TILESIZE*2)+10)<0) return -1;
+    if (ctm_display_game_draw_final_stats(display,SPR,fgalpha,y0+(CTM_TILESIZE*2)+CTM_RESIZE(10))<0) return -1;
   }
   
   return 0;
@@ -621,7 +634,7 @@ int ctm_display_game_get_selected_index(const struct ctm_display *display) {
  */
 
 static int ctm_display_game_draw_national_map(struct ctm_display *display,struct ctm_sprite *spr) {
-  int h=CTM_TILESIZE*3+4;
+  int h=CTM_TILESIZE*3+CTM_RESIZE(4);
   int y=(DISPLAY->reporth>>1)-(h>>1);
   if (ctm_draw_rect(0,y,h,h,0xffffffff)<0) return -1;
 
@@ -632,8 +645,8 @@ static int ctm_display_game_draw_national_map(struct ctm_display *display,struct
   int i;
   for (i=0;i<9;i++) {
     int col=i%3,row=i/3;
-    vtxv[i].x=2+CTM_TILESIZE*col+(CTM_TILESIZE>>1);
-    vtxv[i].y=2+y+CTM_TILESIZE*row+(CTM_TILESIZE>>1);
+    vtxv[i].x=CTM_RESIZE(2)+CTM_TILESIZE*col+(CTM_TILESIZE>>1);
+    vtxv[i].y=CTM_RESIZE(2)+y+CTM_TILESIZE*row+(CTM_TILESIZE>>1);
     vtxv[i].tile=0xba+(row*16)+col;
     switch (ctm_state_prediction[i]) {
       case -2: vtxv[i].r=0x00; vtxv[i].g=0x00; vtxv[i].b=0xff; break;
@@ -677,9 +690,9 @@ static int ctm_display_game_draw_sentiment(struct ctm_display *display,int x,int
     struct ctm_vertex_tile *vtx=ctm_video_vtxv_append(&ctm_shader_tile,1);
     if (!vtx) return -1;
     vtx->tile=0x60+SPR->party;
-    vtx->x=midx+(SPR->decision*midw)/128;
-    vtx->y=y+(SPR->party*h)/7+2;
-    if (SPR->party>=3) vtx->y--;
+    vtx->x=midx+(SPR->decision*midw)/CTM_RESIZE(128);
+    vtx->y=y+(SPR->party*h)/CTM_RESIZE(7)+CTM_RESIZE(2);
+    if (SPR->party>=3) vtx->y-=CTM_RESIZE(1);
   }
   if (ctm_video_end_tiles(ctm_video.texid_uisprites)<0) return -1;
   return 0;
@@ -783,7 +796,7 @@ static int ctm_display_game_draw_report(struct ctm_display *display) {
    * The precise geometry is not known until runtime.
    */
 
-  int mapw=CTM_TILESIZE*3+4;
+  int mapw=CTM_TILESIZE*3+CTM_RESIZE(4);
   int piew=CTM_TILESIZE*3;
   int lblx=mapw+piew;
   int lblw=(CTM_TILESIZE*3+1)/2;

@@ -17,6 +17,7 @@ struct ctm_sprite_missile {
 
 #define CTM_MISSILE_ACTION_DAMAGE    0
 #define CTM_MISSILE_ACTION_COIN      1
+#define CTM_MISSILE_RADIUS ((CTM_TILESIZE*8)/16)
 
 static void _ctm_missile_del(struct ctm_sprite *spr) {
   ctm_sprite_del(SPR->owner);
@@ -40,7 +41,7 @@ static int _ctm_missile_update(struct ctm_sprite *spr) {
   uint32_t prop=ctm_grid_tileprop_for_pixel(spr->x,spr->y,spr->interior);
   if (prop&(CTM_TILEPROP_SOLID|CTM_TILEPROP_POROUS)) return ctm_sprite_kill_later(spr);
 
-  struct ctm_bounds bounds={spr->x-8,spr->x+8,spr->y-8,spr->y+8};
+  struct ctm_bounds bounds={spr->x-CTM_MISSILE_RADIUS,spr->x+CTM_MISSILE_RADIUS,spr->y-CTM_MISSILE_RADIUS,spr->y+CTM_MISSILE_RADIUS};
   int i; for (i=0;i<ctm_group_fragile.sprc;i++) {
     struct ctm_sprite *qspr=ctm_group_fragile.sprv[i];
     if (qspr==SPR->owner) continue;

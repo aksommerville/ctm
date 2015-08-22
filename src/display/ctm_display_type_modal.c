@@ -110,8 +110,8 @@ static int _ctm_display_modal_resized(struct ctm_display *display) {
    */
   int fbw=display->w;
   int fbh=display->h;
-  int excessx=fbw/160;
-  int excessy=fbh/160;
+  int excessx=fbw/CTM_RESIZE(160);
+  int excessy=fbh/CTM_RESIZE(160);
   int excess=(excessx>excessy)?excessx:excessy;
   if (excess>1) {
     excess--;
