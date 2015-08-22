@@ -10,6 +10,7 @@
 #include "display/ctm_display.h"
 #include "input/ctm_input.h"
 #include "audio/ctm_audio.h"
+#include <signal.h>
 
 #define CTM_TIMELIMIT_LIMIT 99
 #define CTM_STATSTRIGGER_TIME 100 // Frames.
@@ -287,10 +288,39 @@ static int ctm_game_update_mainmenu() {
   return 0;
 }
 
+/* Update modal dialog box.
+ */
+
+static int ctm_game_update_modal(struct ctm_display *modal) {
+  uint16_t allinput=0;
+  int i; for (i=0;i<5;i++) allinput|=ctm_input_by_playerid[i];
+  if (allinput!=ctm_game.pvinput) { // Input state changed.
+    uint16_t n=allinput;
+    uint16_t o=ctm_game.pvinput;
+    ctm_game.pvinput=n;
+    #define PRESS(tag) ((n&CTM_BTNID_##tag)&&!(o&CTM_BTNID_##tag))
+    if (PRESS(UP)) {
+      if (ctm_display_modal_adjust(modal,-1)<0) return -1; 
+    }
+    if (PRESS(DOWN)) {
+      if (ctm_display_modal_adjust(modal,1)<0) return -1;
+    }
+    if (PRESS(PRIMARY)||PRESS(SECONDARY)||PRESS(TERTIARY)||PRESS(PAUSE)) {
+      if (ctm_display_modal_activate(modal)<0) return -1;
+    }
+    #undef PRESS
+  }
+  return 0;
+}
+
 /* Update.
  */
 
 int ctm_game_update() {
+
+  struct ctm_display *modal=ctm_display_get_modal();
+  if (modal) return ctm_game_update_modal(modal);
+
   switch (ctm_game.phase) {
     case CTM_GAME_PHASE_MAINMENU: return ctm_game_update_mainmenu();
     case CTM_GAME_PHASE_PLAY: return ctm_game_update_play();
@@ -325,6 +355,48 @@ int ctm_game_main_menu() {
   ctm_game.population=0;
   ctm_game.difficulty=0;
 
+  return 0;
+}
+
+/* User requests quit, eg by pressing ESC.
+ */
+
+static int ctm_game_abortcb_resume(void *userdata) {
+  return 0;
+}
+
+static int ctm_game_abortcb_menu(void *userdata) {
+  if (ctm_game_main_menu()<0) return -1;
+  return 0;
+}
+
+static int ctm_game_abortcb_quit(void *userdata) {
+  raise(SIGTERM);
+  return 0;
+}
+ 
+int ctm_game_user_quit() {
+  switch (ctm_game.phase) {
+
+    // Play modes: Show or dismiss the Abort modal.
+    case CTM_GAME_PHASE_PLAY:
+    case CTM_GAME_PHASE_PREGAMEOVER: {
+        struct ctm_display *modal=ctm_display_get_modal();
+        if (modal) {
+          ctm_display_end_modal();
+        } else {
+          if (!(modal=ctm_display_begin_modal())) return -1;
+          if (ctm_display_modal_add_option(modal,"Resume",6,ctm_game_abortcb_resume,0)<0) return -1;
+          if (ctm_display_modal_add_option(modal,"Main Menu",9,ctm_game_abortcb_menu,0)<0) return -1;
+          if (ctm_display_modal_add_option(modal,"Quit",4,ctm_game_abortcb_quit,0)<0) return -1;
+        }
+      } break;
+
+    // MAINMENU, GAMEOVER, anything else: Quit immediately.
+    default: { 
+        raise(SIGTERM);
+      }
+  }
   return 0;
 }
 

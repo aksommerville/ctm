@@ -67,5 +67,6 @@ int ctm_game_update();
 int ctm_game_reset(int timelimit_minutes,int playerc_blue,int playerc_red,int population,int difficulty);
 
 int ctm_game_main_menu();
+int ctm_game_user_quit();
 
 #endif

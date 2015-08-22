@@ -332,7 +332,7 @@ int ctm_input_event(int devid,uint16_t btnid,int value) {
   if (btnid&CTM_BTNID_SIGNAL) {
     if (value) switch (btnid) {
 
-      case CTM_BTNID_QUIT: raise(SIGTERM); break;
+      case CTM_BTNID_QUIT: return ctm_game_user_quit();
       case CTM_BTNID_RESET: return ctm_game_main_menu();
       case CTM_BTNID_SCREENSHOT: return ctm_input_screenshot();
       case CTM_BTNID_RESIZE: return ctm_video_screen_size_changed();

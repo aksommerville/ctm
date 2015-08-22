@@ -45,6 +45,7 @@ struct ctm_display {
   uint32_t fb;
   int fbw,fbh;
   uint8_t fbalpha;
+  int use_master_alpha; // Controls format of framebuffer (RGB or RGBA).
   
 };
 
@@ -106,6 +107,7 @@ extern const struct ctm_display_type ctm_display_type_mainmenu;
 extern const struct ctm_display_type ctm_display_type_gameover;
 extern const struct ctm_display_type ctm_display_type_editor;
 extern const struct ctm_display_type ctm_display_type_filler;
+extern const struct ctm_display_type ctm_display_type_modal;
 
 /* --- Player views. ---
  */
@@ -198,6 +200,18 @@ int ctm_display_mainmenu_adjust(struct ctm_display *display,int dx,int dy);
  */
 
 struct ctm_display *ctm_display_get_gameover();
+
+/* --- Modal menus. ---
+ */
+
+struct ctm_display *ctm_display_get_modal();
+struct ctm_display *ctm_display_begin_modal();
+void ctm_display_end_modal();
+int ctm_display_modal_add_option(struct ctm_display *display,const char *label,int labelc,int (*cb)(void *userdata),void *userdata);
+int ctm_display_modal_reset(struct ctm_display *display);
+
+int ctm_display_modal_adjust(struct ctm_display *display,int d);
+int ctm_display_modal_activate(struct ctm_display *display);
 
 /* --- Helpers for display implementation. ---
  */

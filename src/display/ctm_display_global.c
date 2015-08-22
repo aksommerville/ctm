@@ -154,9 +154,12 @@ int ctm_display_draw() {
     ctm_video_reset_uniform_screen_size();
   }
 
-  /* Copy displays to screen, either by their 'draw' function, or by drawing their fb texture. */
+  /* Copy displays to screen, either by their 'draw' function, or by drawing their fb texture. 
+   * Ugly hack to prevent lines on top of modals: Skip modals in this pass.
+   */
   for (i=0;i<ctm_displays.c;i++) {
     struct ctm_display *display=ctm_displays.v[i];
+    if (display->type==&ctm_display_type_modal) continue;
     if (display->type->draw) {
       if (display->type->draw(display)<0) return -1;
     } else if (display->fbtexid) {
@@ -192,6 +195,18 @@ int ctm_display_draw() {
   }
 
   if (ctm_display_draw_newspaper()<0) return -1;
+
+  /* Ugly hack: modal displays get drawn above lines and newspaper.
+   */
+  for (i=0;i<ctm_displays.c;i++) {
+    struct ctm_display *display=ctm_displays.v[i];
+    if (display->type!=&ctm_display_type_modal) continue;
+    if (display->type->draw) {
+      if (display->type->draw(display)<0) return -1;
+    } else if (display->fbtexid) {
+      if (ctm_draw_texture(display->x,display->y,display->w,display->h,display->fbtexid,1)<0) return -1;
+    }
+  }
 
   /* Let 'video' unit figure out how to commit the frame. (by triggering one of the optional units...) */
   if (ctm_video_swap()<0) return -1;
@@ -412,6 +427,37 @@ struct ctm_display *ctm_display_get_mainmenu() {
 struct ctm_display *ctm_display_get_gameover() {
   int i; for (i=0;i<ctm_displays.c;i++) if (ctm_displays.v[i]->type==&ctm_display_type_gameover) return ctm_displays.v[i];
   return 0;
+}
+
+struct ctm_display *ctm_display_get_modal() {
+  int i; for (i=0;i<ctm_displays.c;i++) if (ctm_displays.v[i]->type==&ctm_display_type_modal) return ctm_displays.v[i];
+  return 0;
+}
+
+/* Public: Begin or end modal dialog. There can only be one.
+ */
+ 
+struct ctm_display *ctm_display_begin_modal() {
+  struct ctm_display *display=ctm_display_get_modal();
+  if (display) {
+    ctm_display_modal_reset(display);
+    return display;
+  }
+  if (ctm_display_require(1)<0) return 0;
+  if (!(display=ctm_display_alloc(&ctm_display_type_modal))) return 0;
+  if (ctm_display_set_bounds(display,ctm_screenw>>2,ctm_screenh>>2,ctm_screenw>>1,ctm_screenh>>1)<0) return 0;
+  ctm_displays.v[ctm_displays.c++]=display;
+  return display;
+}
+
+void ctm_display_end_modal() {
+  int i; for (i=0;i<ctm_displays.c;i++) if (ctm_displays.v[i]->type==&ctm_display_type_modal) {
+    struct ctm_display *display=ctm_displays.v[i];
+    ctm_display_del(display);
+    ctm_displays.c--;
+    memmove(ctm_displays.v+i,ctm_displays.v+i+1,sizeof(void*)*(ctm_displays.c-i));
+    return;
+  }
 }
 
 /* Public newspaper access.

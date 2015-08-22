@@ -48,7 +48,8 @@ int ctm_display_resize_fb(struct ctm_display *display,int fbw,int fbh) {
   } else {
     glBindTexture(GL_TEXTURE_2D,display->fbtexid);
   }
-  glTexImage2D(GL_TEXTURE_2D,0,GL_RGB,fbw,fbh,0,GL_RGB,GL_UNSIGNED_BYTE,0);
+  int fmt=display->use_master_alpha?GL_RGBA:GL_RGB;
+  glTexImage2D(GL_TEXTURE_2D,0,fmt,fbw,fbh,0,fmt,GL_UNSIGNED_BYTE,0);
 
   // Allocate framebuffer.
   if (!display->fb) {
