@@ -150,6 +150,9 @@ int ctm_video_end_tiles(GLuint texid) {
   if (ctm_video.vtxc<1) return 0;
   if (ctm_video.vtxuser!=&ctm_shader_tile) return -1;
   glUseProgram(ctm_shader_tile.program);
+  #ifndef __gl_h_
+    glBlendFuncSeparate(GL_SRC_ALPHA,GL_DST_ALPHA,GL_SRC_ALPHA,GL_DST_ALPHA);
+  #endif
   glBindTexture(GL_TEXTURE_2D,texid);
   glEnableVertexAttribArray(0);
   glEnableVertexAttribArray(1);
@@ -160,6 +163,9 @@ int ctm_video_end_tiles(GLuint texid) {
   glDisableVertexAttribArray(0);
   glDisableVertexAttribArray(1);
   ctm_video.vtxc=0;
+  #ifndef __gl_h_
+    glBlendFuncSeparate(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA,GL_SRC_ALPHA,GL_DST_ALPHA);
+  #endif
   return 0;
 }
 

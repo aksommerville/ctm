@@ -16,6 +16,9 @@
 #define CTM_FBW_MAX (CTM_TILESIZE*25)
 #define CTM_FBH_MAX (CTM_TILESIZE*20)
 
+#define CTM_REPORTW_LO (CTM_TILESIZE<<3)
+#define CTM_REPORTH_LO (CTM_TILESIZE*3+((CTM_TILESIZE*4)/16))
+
 /* Object type.
  */
 
@@ -124,6 +127,8 @@ static int _ctm_display_game_resized(struct ctm_display *display) {
   DISPLAY->reportw=(display->fbw*5)/6;
   DISPLAY->reporth=((display->fbh-(CTM_TILESIZE<<2)-(CTM_TILESIZE*DISPLAY->itemstore_rowc*2)-(CTM_TILESIZE<<1))*7)/8;
   if ((DISPLAY->reportw>0)&&(DISPLAY->reporth>0)) {
+    if (DISPLAY->reportw<CTM_REPORTW_LO) DISPLAY->reportw=CTM_REPORTW_LO;
+    if (DISPLAY->reporth<CTM_REPORTH_LO) DISPLAY->reporth=CTM_REPORTH_LO;
     glBindTexture(GL_TEXTURE_2D,DISPLAY->texid_report);
     glTexImage2D(GL_TEXTURE_2D,0,GL_RGB,DISPLAY->reportw,DISPLAY->reporth,0,GL_RGB,GL_UNSIGNED_BYTE,0);
     DISPLAY->have_report=0;
@@ -397,9 +402,6 @@ static int ctm_display_game_draw_pause(struct ctm_display *display,struct ctm_sp
   glClearColor((partycolor>>24)/512.0,((partycolor>>16)&0xff)/512.0,((partycolor>>8)&0xff)/512.0,1.0);
   glClear(GL_COLOR_BUFFER_BIT);
 
-  /* Draw interactive item store. */
-  if (ctm_display_game_draw_item_store(display,SPR)<0) return -1;
-
   /* If we have a report, draw it in centered in whatever vertical space remains. */
   if (DISPLAY->have_report) {
     int rptx=(display->fbw>>1)-(DISPLAY->reportw>>1);
@@ -408,6 +410,9 @@ static int ctm_display_game_draw_pause(struct ctm_display *display,struct ctm_sp
     int rpty=availy+(availh>>1)-(DISPLAY->reporth>>1);
     if (ctm_draw_texture(rptx,rpty,DISPLAY->reportw,DISPLAY->reporth,DISPLAY->texid_report,1)<0) return -1;
   }
+
+  /* Draw interactive item store. */
+  if (ctm_display_game_draw_item_store(display,SPR)<0) return -1;
   
   return 0;
 }
