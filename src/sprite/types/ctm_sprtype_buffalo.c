@@ -74,10 +74,31 @@ static int _ctm_buffalo_draw(struct ctm_sprite *spr,int addx,int addy) {
     default: vtxv[linkc].tile=0x2c; break;
   }
 
-  vtxv[linkc+1].x=spr->x+addx-CTM_TILESIZE-SPR->extension+1;
+  vtxv[linkc+1].x=spr->x+addx-CTM_TILESIZE-SPR->extension+CTM_RESIZE(1);
   vtxv[linkc+1].tile=0x2b;
   if (SPR->extension) vtxv[linkc+1].tile+=0x10;
 
+  return 0;
+}
+
+/* Test damage collision.
+ */
+
+static int _ctm_buffalo_test_damage_collision_1(int sprx,int spry,int x,int y,int w,int h) {
+  const int sprw=CTM_TILESIZE;
+  const int sprh=CTM_TILESIZE;
+  sprx-=sprw>>1;
+  spry-=sprh>>1;
+  if (sprx+sprw<=x) return 0;
+  if (spry+sprh<=y) return 0;
+  if (sprx>=x+w) return 0;
+  if (spry>=y+h) return 0;
+  return 1;
+}
+
+static int _ctm_buffalo_test_damage_collision(struct ctm_sprite *spr,int x,int y,int w,int h,struct ctm_sprite *assailant) {
+  if (_ctm_buffalo_test_damage_collision_1(spr->x,spr->y,x,y,w,h)) return 1;
+  if (_ctm_buffalo_test_damage_collision_1(spr->x-CTM_TILESIZE-SPR->extension+CTM_RESIZE(1),spr->y,x,y,w,h)) return 1;
   return 0;
 }
 
@@ -208,4 +229,5 @@ const struct ctm_sprtype ctm_sprtype_buffalo={
   .draw=_ctm_buffalo_draw,
   .update=_ctm_buffalo_update,
   .hurt=_ctm_buffalo_hurt,
+  .test_damage_collision=_ctm_buffalo_test_damage_collision,
 };

@@ -144,6 +144,14 @@ struct ctm_sprtype {
   int (*hurt)(struct ctm_sprite *spr,struct ctm_sprite *assailant);
   int (*grab)(struct ctm_sprite *spr,int grab);
 
+  /* If you join ctm_sprgrp_fragile but do not implement this, sprite is a square at CTM_TILESIZE.
+   * If you implement, this must return >0 if a collision occurred.
+   * Called only if you are in ctm_sprgrp_fragile, and on the same terior as the weapon.
+   * (x,y,w,h) is the effective bounds of the weapon.
+   * (assailant) is NULL, or the sprite responsible, typically a hero.
+   */
+  int (*test_damage_collision)(struct ctm_sprite *spr,int x,int y,int w,int h,struct ctm_sprite *assailant);
+
 };
 
 extern const struct ctm_sprtype ctm_sprtype_dummy;

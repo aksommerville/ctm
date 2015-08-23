@@ -185,8 +185,12 @@ int ctm_player_check_prize_pickup(struct ctm_sprite *spr) {
  */
 
 int ctm_player_deal_damage(struct ctm_sprite *spr,int x,int y,int w,int h) {
-  int did_commit_murder=0;
-  int did_commit_heroism=0; // It's a fine distinction.
+
+  /* Add half a tile to each side, then we can test against each fragile sprite's midpoint. 
+   * This assumes that all fragile sprites are exactly a single tile in size.
+   * If the victim implements test_damage_collision, they see the original bounds.
+   */
+  int ox=x,oy=y,ow=w,oh=h;
   x-=CTM_TILESIZE>>1;
   y-=CTM_TILESIZE>>1;
   w+=CTM_TILESIZE;
@@ -197,12 +201,18 @@ int ctm_player_deal_damage(struct ctm_sprite *spr,int x,int y,int w,int h) {
     struct ctm_sprite *qspr=ctm_group_fragile.sprv[i];
     if (qspr==spr) continue;
     if (qspr->interior!=spr->interior) continue;
-    if (qspr->x<x) continue;
-    if (qspr->y<y) continue;
-    if (qspr->x>=x+w) continue;
-    if (qspr->y>=y+h) continue;
-    if (qspr->type->soul) did_commit_murder=1;
-    else did_commit_heroism=1;
+
+    if (qspr->type->test_damage_collision) {
+      int result=qspr->type->test_damage_collision(qspr,ox,oy,ow,oh,spr);
+      if (result<0) return -1;
+      if (!result) continue;
+    } else {
+      if (qspr->x<x) continue;
+      if (qspr->y<y) continue;
+      if (qspr->x>=x+w) continue;
+      if (qspr->y>=y+h) continue;
+    }
+
     if (ctm_sprite_hurt(qspr,spr)<0) return -1;
   }
   
