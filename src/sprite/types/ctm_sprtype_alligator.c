@@ -106,6 +106,37 @@ static int _ctm_alligator_draw(struct ctm_sprite *spr,int addx,int addy) {
   return 0;
 }
 
+/* Test damage or hazard collision.
+ */
+
+static int _ctm_alligator_test_damage_collision(struct ctm_sprite *spr,int x,int y,int w,int h,struct ctm_sprite *assailant) {
+
+  // Start with our basic square.
+  // In the double-wide configurations, spr->(x,y) is always the head.
+  int sprx=spr->x-(CTM_TILESIZE>>1);
+  int spry=spr->y-(CTM_TILESIZE>>1);
+  int sprw=CTM_TILESIZE;
+  int sprh=CTM_TILESIZE;
+
+  // Expand one tile horizontally, depending on state.
+  switch (SPR->phase) {
+    case CTM_ALLIGATOR_PHASE_GNASH:
+    case CTM_ALLIGATOR_PHASE_CHARGE: {
+        if (spr->flop) { // Facing right
+          sprx-=CTM_TILESIZE;
+        }
+        sprw+=CTM_TILESIZE;
+      } break;
+  }
+
+  // Compare to weapon.
+  if (sprx+sprw<=x) return 0;
+  if (spry+sprh<=y) return 0;
+  if (sprx>=x+w) return 0;
+  if (spry>=y+h) return 0;
+  return 1;
+}
+
 /* Update.
  */
 
@@ -294,4 +325,6 @@ const struct ctm_sprtype ctm_sprtype_alligator={
   .draw=_ctm_alligator_draw,
   .update=_ctm_alligator_update,
   .hurt=_ctm_alligator_hurt,
+  .test_damage_collision=_ctm_alligator_test_damage_collision,
+  .test_hazard_collision=_ctm_alligator_test_damage_collision,
 };

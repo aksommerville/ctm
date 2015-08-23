@@ -152,6 +152,11 @@ struct ctm_sprtype {
    */
   int (*test_damage_collision)(struct ctm_sprite *spr,int x,int y,int w,int h,struct ctm_sprite *assailant);
 
+  /* Same as test_damage_collision, for checking when we should hurt the heroes.
+   * It is perfectly sensible to point this to the same function as test_damage_collision.
+   */
+  int (*test_hazard_collision)(struct ctm_sprite *spr,int x,int y,int w,int h,struct ctm_sprite *victim);
+
 };
 
 extern const struct ctm_sprtype ctm_sprtype_dummy;

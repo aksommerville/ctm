@@ -559,11 +559,24 @@ static int _ctm_player_update(struct ctm_sprite *spr) {
   if (!SPR->invincible) {
     int i; for (i=0;i<ctm_group_hazard.sprc;i++) {
       struct ctm_sprite *hazard=ctm_group_hazard.sprv[i];
-						if (hazard->interior!=spr->interior) continue;
-      int dx=hazard->x-spr->x;
-      if ((dx<-CTM_PLAYER_HAZARD_RADIUS)||(dx>CTM_PLAYER_HAZARD_RADIUS)) continue;
-      int dy=hazard->y-spr->y;
-      if ((dy<-CTM_PLAYER_HAZARD_RADIUS)||(dy>CTM_PLAYER_HAZARD_RADIUS)) continue;
+      if (hazard->interior!=spr->interior) continue;
+      if (hazard->type->test_hazard_collision) {
+        int result=hazard->type->test_hazard_collision(
+          hazard,
+          spr->x-(CTM_PLAYER_HAZARD_RADIUS>>1),
+          spr->y-(CTM_PLAYER_HAZARD_RADIUS>>1),
+          CTM_PLAYER_HAZARD_RADIUS,
+          CTM_PLAYER_HAZARD_RADIUS,
+          spr
+        );
+        if (result<0) return -1;
+        if (!result) continue;
+      } else {
+        int dx=hazard->x-spr->x;
+        if ((dx<-CTM_PLAYER_HAZARD_RADIUS)||(dx>CTM_PLAYER_HAZARD_RADIUS)) continue;
+        int dy=hazard->y-spr->y;
+        if ((dy<-CTM_PLAYER_HAZARD_RADIUS)||(dy>CTM_PLAYER_HAZARD_RADIUS)) continue;
+      }
       if (ctm_sprite_hurt(spr,hazard)<0) return -1;
       break;
     }

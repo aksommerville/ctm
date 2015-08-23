@@ -36,7 +36,7 @@ struct ctm_sprite_cthulhu {
 #define CTM_CTHULHU_NECK2_Y_ADJUST ((CTM_TILESIZE*12)/16)
 #define CTM_CTHULHU_NECK2_ELEVATION_FACTOR ((CTM_TILESIZE*10)/16)
 #define CTM_CTHULHU_NECK3_Y_ADJUST ((CTM_TILESIZE*16)/16)
-#define CTM_CTHULHU_NECK3_ELEVATION_FACTOR ((CTM_TILESIZE*5)/16)
+#define CTM_CTHULHU_NECK3_ELEVATION_FACTOR ((CTM_TILESIZE*20)/16)
 
 /* Delete.
  */
@@ -70,11 +70,11 @@ static int _ctm_cthulhu_draw(struct ctm_sprite *spr,int addx,int addy) {
   vtxv[1].tile=SPR->tentframe?0x1e:0x0e;
 
   vtxv[2].x=spr->x+addx+CTM_CTHULHU_NECK_X_ADJUST;
-  vtxv[2].y=spr->y+addy-CTM_CTHULHU_NECK2_Y_ADJUST-SPR->elevation/CTM_CTHULHU_NECK2_ELEVATION_FACTOR;
+  vtxv[2].y=spr->y+addy-CTM_CTHULHU_NECK2_Y_ADJUST-(SPR->elevation*CTM_CTHULHU_NECK2_ELEVATION_FACTOR)/100;
   vtxv[2].tile=SPR->tentframe?0x0e:0x1e;
 
   vtxv[3].x=spr->x+addx+CTM_CTHULHU_NECK_X_ADJUST;
-  vtxv[3].y=spr->y+addy-CTM_CTHULHU_NECK3_Y_ADJUST-SPR->elevation/CTM_CTHULHU_NECK3_ELEVATION_FACTOR;
+  vtxv[3].y=spr->y+addy-CTM_CTHULHU_NECK3_Y_ADJUST-(SPR->elevation*CTM_CTHULHU_NECK3_ELEVATION_FACTOR)/100;
   vtxv[3].tile=0x0f;
 
   return 0;
