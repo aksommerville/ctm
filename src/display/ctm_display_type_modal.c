@@ -44,7 +44,7 @@ static void _ctm_display_modal_del(struct ctm_display *display) {
 
 static int _ctm_display_modal_init(struct ctm_display *display) {
   display->use_master_alpha=1;
-  DISPLAY->bgcolor=0x000000a0;
+  DISPLAY->bgcolor=0x500060e0;
   DISPLAY->textcolor=0x000000ff;
   DISPLAY->intro_delay=30;
   return 0;
@@ -110,7 +110,7 @@ static int _ctm_display_modal_resized(struct ctm_display *display) {
    */
   int fbw=display->w;
   int fbh=display->h;
-  int excessx=fbw/CTM_RESIZE(160);
+  int excessx=fbw/CTM_RESIZE(120);
   int excessy=fbh/CTM_RESIZE(160);
   int excess=(excessx>excessy)?excessx:excessy;
   if (excess>1) {

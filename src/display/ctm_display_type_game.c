@@ -695,7 +695,7 @@ static int ctm_display_game_draw_sentiment(struct ctm_display *display,int x,int
     struct ctm_vertex_tile *vtx=ctm_video_vtxv_append(&ctm_shader_tile,1);
     if (!vtx) return -1;
     vtx->tile=0x60+SPR->party;
-    vtx->x=midx+(SPR->decision*midw)/CTM_RESIZE(128);
+    vtx->x=midx+(SPR->decision*midw)/128;
     vtx->y=y+(SPR->party*h)/CTM_RESIZE(7)+CTM_RESIZE(2);
     if (SPR->party>=3) vtx->y-=CTM_RESIZE(1);
   }

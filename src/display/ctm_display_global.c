@@ -445,7 +445,7 @@ struct ctm_display *ctm_display_begin_modal() {
   }
   if (ctm_display_require(1)<0) return 0;
   if (!(display=ctm_display_alloc(&ctm_display_type_modal))) return 0;
-  int dw=(ctm_screenw*3)/4;
+  int dw=(ctm_screenw*2)/4;
   int dh=(ctm_screenh*3)/4;
   if (ctm_display_set_bounds(display,(ctm_screenw>>1)-(dw>>1),(ctm_screenh>>1)-(dh>>1),dw,dh)<0) return 0;
   ctm_displays.v[ctm_displays.c++]=display;
