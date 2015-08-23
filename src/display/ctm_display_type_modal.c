@@ -129,6 +129,8 @@ static int _ctm_display_modal_resized(struct ctm_display *display) {
  */
 
 static int ctm_display_modal_draw_background(struct ctm_display *display) {
+  glClearColor(0.0f,0.0f,0.0f,0.0f);
+  glClear(GL_COLOR_BUFFER_BIT);
   if (ctm_draw_rect(0,0,display->fbw,display->fbh,DISPLAY->bgcolor)<0) return -1;
   return 0;
 }
@@ -136,39 +138,41 @@ static int ctm_display_modal_draw_background(struct ctm_display *display) {
 /* Draw tiles.
  */
 
-static int ctm_modal_button_add_tiles(struct ctm_modal_button *button,int highlight) {
-  if (button->w>0) {
-    int tilec=button->w<<1;
-    struct ctm_vertex_tile *vtxv=ctm_video_vtxv_append(&ctm_shader_tile,tilec);
-    if (!vtxv) return -1;
-    uint8_t tilebase=highlight?0x77:0x7a;
-    struct ctm_vertex_tile *vtx=vtxv;
-    int i,x;
-    for (i=0,x=button->x;i<button->w;i++,vtx++,x+=CTM_TILESIZE) {
-      vtx->x=x;
-      vtx->y=button->y;
-      vtx->tile=tilebase+0x01;
-    }
-    int y=button->y+CTM_TILESIZE;
-    for (i=0,x=button->x;i<button->w;i++,vtx++,x+=CTM_TILESIZE) {
-      vtx->x=x;
-      vtx->y=y;
-      vtx->tile=tilebase+0x21;
-    }
-    vtxv[0].tile=tilebase;
-    vtxv[button->w-1].tile=tilebase+0x02;
-    vtxv[button->w].tile=tilebase+0x20;
-    vtxv[tilec-1].tile=tilebase+0x22;
+static int ctm_modal_button_add_sprites(struct ctm_modal_button *button,int highlight) {
+  if (button->w<1) return 0;
+  int spritec=button->w<<1;
+  struct ctm_vertex_sprite *vtxv=ctm_video_vtxv_append(&ctm_shader_sprite,spritec);
+  if (!vtxv) return -1;
+  memset(vtxv,0,sizeof(struct ctm_vertex_sprite)*spritec);
+  uint8_t tilebase=highlight?0x77:0x7a;
+  struct ctm_vertex_sprite *vtx=vtxv;
+  int i,x;
+  for (i=0,x=button->x;i<button->w;i++,vtx++,x+=CTM_TILESIZE) {
+    vtx->x=x;
+    vtx->y=button->y;
+    vtx->tile=tilebase+0x01;
+    vtx->a=0xff;
   }
+  int y=button->y+CTM_TILESIZE;
+  for (i=0,x=button->x;i<button->w;i++,vtx++,x+=CTM_TILESIZE) {
+    vtx->x=x;
+    vtx->y=y;
+    vtx->tile=tilebase+0x21;
+    vtx->a=0xff;
+  }
+  vtxv[0].tile=tilebase;
+  vtxv[button->w-1].tile=tilebase+0x02;
+  vtxv[button->w].tile=tilebase+0x20;
+  vtxv[spritec-1].tile=tilebase+0x22;
   return 0;
 }
 
 static int ctm_display_modal_draw_tiles(struct ctm_display *display) {
-  if (ctm_video_begin_tiles()<0) return -1;
+  if (ctm_video_begin_sprites()<0) return -1;
   int i; for (i=0;i<DISPLAY->buttonc;i++) {
-    if (ctm_modal_button_add_tiles(DISPLAY->buttonv+i,(i==DISPLAY->selection)&&!DISPLAY->intro_delay)<0) return -1;
+    if (ctm_modal_button_add_sprites(DISPLAY->buttonv+i,(i==DISPLAY->selection)&&!DISPLAY->intro_delay)<0) return -1;
   }
-  if (ctm_video_end_tiles(ctm_video.texid_uisprites)<0) return -1;
+  if (ctm_video_end_sprites(ctm_video.texid_uisprites)<0) return -1;
   return 0;
 }
 
