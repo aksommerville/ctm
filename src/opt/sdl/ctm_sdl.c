@@ -3,9 +3,13 @@
 #include "video/ctm_video.h"
 #include "input/ctm_input.h"
 #include "io/ctm_fs.h"
+#include "ctm_dump_audio.h"
 
 /* Globals.
  */
+
+// Set this NULL to disable audio dump. No other changes necessary.
+#define CTM_DUMP_AUDIO_PATH 0
  
 extern const unsigned char ctm_program_icon[]; // ctm_program_icon.c
 extern const int ctm_program_icon_w;
@@ -84,8 +88,8 @@ int ctm_sdl_init(int fullscreen) {
 
   ctm_sdl.videoinit=1;
   ctm_sdl.videoflags=SDL_OPENGL|SDL_DOUBLEBUF;
-  ctm_sdl.winw=640;
-  ctm_sdl.winh=480;
+  ctm_sdl.winw=960;//640;
+  ctm_sdl.winh=540;//480;
   ctm_sdl.fullscreen=0;
   SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER,1);
   const SDL_VideoInfo *vinfo=SDL_GetVideoInfo();
@@ -381,11 +385,14 @@ void ctm_sdl_quit_input() {
 static void ctm_sdl_audio_cb(void *userdata,Uint8 *dst,int dstc) {
   void (*cb)(int16_t*,int)=userdata;
   cb((int16_t*)dst,dstc>>1);
+  ctm_dump_audio_provide(dst,dstc);
 }
 
 int ctm_sdl_init_audio(void (*cb)(int16_t *dst,int dstc)) {
   if (!cb||ctm_sdl.audioinit) return -1;
   if (SDL_InitSubSystem(SDL_INIT_AUDIO)) return -1;
+
+  if (ctm_dump_audio_init(CTM_DUMP_AUDIO_PATH)<0) return -1;
 
   SDL_AudioSpec spec={
     .freq=44100,
@@ -404,6 +411,7 @@ int ctm_sdl_init_audio(void (*cb)(int16_t *dst,int dstc)) {
 
 void ctm_sdl_quit_audio() {
   if (!ctm_sdl.audioinit) return;
+  ctm_dump_audio_quit();
   SDL_PauseAudio(1);
   SDL_QuitSubSystem(SDL_INIT_AUDIO);
   ctm_sdl.audioinit=0;
@@ -552,6 +560,7 @@ static int ctm_sdl_event_key(SDLKey keysym,int value) {
  
 int ctm_sdl_update() {
   SDL_Event evt;
+  if (ctm_dump_audio_update()<0) return -1;
   while (SDL_PollEvent(&evt)) switch (evt.type) {
   
     case SDL_QUIT: if (ctm_input_event(0,CTM_BTNID_QUIT,1)<0) return -1; break;

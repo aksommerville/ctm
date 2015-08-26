@@ -87,7 +87,7 @@ else ifeq ($(CTM_CONFIG),macos) # ----- MacOS X with SDL (default) -----
   OPT:=sdl
 
   APP:=CampaignTrailOfTheMummy.app/Contents/MacOS/CampaignTrailOfTheMummy
-  POSTRUN:=--fullscreen=1
+  POSTRUN:=--fullscreen=0
 
 else ifeq ($(CTM_CONFIG),macos-glx) # ----- MacOS X with GLX (must request explicitly) -----
 # This is not a great choice of drivers. It's only available because I had to write GLX anyway for Linux.
