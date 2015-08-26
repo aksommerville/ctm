@@ -5,6 +5,16 @@
 /* Generate newspaper texture.
  * Everything loaded, and GL is pointing at the texture.
  * If you do nothing here, a blank newspaper pops out.
+ *
+ * Events:
+ *   0 Rescue baby
+ *   1 Win Nobel prize
+ *   2 Land on moon
+ *   3 Cure cancer
+ *   4 Free hot dogs
+ *   5 Dedicate monument
+ *   6 Slay dragon
+ *   7 Rescue princess
  */
 
 static int ctm_generate_newspaper_1(GLuint texid_bg,GLuint texid_bits,int stateix,int party) {

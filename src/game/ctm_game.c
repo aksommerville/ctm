@@ -548,6 +548,23 @@ static int ctm_game_schedule_werewolf() {
         everybodyc= (ctm_game.werewolf_eventc*60)/100;
       } break;
   }
+
+  /* Data scrub: Do not generate events for White or Black parties.
+   * "Werewolf rescues white baby" and "Free hot dogs for blacks" sound kind of dicey.
+   * These drop the 'everybody' counter, possibly below zero.
+   * That may impact the precision of difficulty settings, but fuck it, it's not brain surgery.
+   */
+  for (i=0;i<ctm_game.werewolf_eventc;i++) {
+    switch (ctm_game.werewolf_eventv[i].party) {
+      case CTM_PARTY_WHITE:
+      case CTM_PARTY_BLACK: {
+        ctm_game.werewolf_eventv[i].party=-1;
+        everybodyc--;
+      }
+    }
+  }
+
+  /* Proceed with expanding event ranges due to difficulty level. */
   while (nationwidec-->0) {
     while (1) {
       int p=rand()%ctm_game.werewolf_eventc;
