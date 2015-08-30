@@ -1,0 +1,35 @@
+#!/usr/bin/env python
+import sys,os
+
+""" http://www.topherlee.com/software/pcm-tut-wavformat.html
+1 - 4	"RIFF"	Marks the file as a riff file. Characters are each 1 byte long.
+5 - 8	File size (integer)	Size of the overall file - 8 bytes, in bytes (32-bit integer). Typically, you'd fill this in after creation.
+9 -12	"WAVE"	File Type Header. For our purposes, it always equals "WAVE".
+13-16	"fmt "	Format chunk marker. Includes trailing null
+17-20	16	Length of format data as listed above
+21-22	1	Type of format (1 is PCM) - 2 byte integer
+23-24	2	Number of Channels - 2 byte integer
+25-28	44100	Sample Rate - 32 byte integer. Common values are 44100 (CD), 48000 (DAT). Sample Rate = Number of Samples per second, or Hertz.
+29-32	176400	(Sample Rate * BitsPerSample * Channels) / 8.
+33-34	4	(BitsPerSample * Channels) / 8.1 - 8 bit mono2 - 8 bit stereo/16 bit mono4 - 16 bit stereo
+35-36	16	Bits per sample
+37-40	"data"	"data" chunk header. Marks the beginning of the data section.
+41-44	File size (data)	Size of the data section.
+Sample values are given above for a 16-bit stereo source.
+"""
+
+def abort(msg=None):
+  if not (msg is None): sys.stderr.write("%s\n"%(msg))
+  sys.exit(1)
+
+if len(sys.argv)!=3: abort("Usage: %s INPUT OUTPUT"%(sys.argv[0]))
+SRCPATH=sys.argv[1]
+DSTPATH=sys.argv[2]
+
+def wr32le(n): return chr(n&0xff)+chr((n>>8)&0xff)+chr((n>>16)&0xff)+chr((n>>24)&0xff)
+def wr16le(n): return chr(n&0xff)+chr((n>>8)&0xff)
+
+# Our raw input will always be one channel, signed 16-bit little-endian, at 44100 Hz.
+pcm=open(SRCPATH,"r").read()
+hdr="RIFF"+wr32le(len(pcm)+36)+"WAVEfmt "+wr32le(16)+wr16le(1)+wr16le(1)+wr32le(44100)+wr32le(88200)+wr16le(2)+wr16le(16)+"data"+wr32le(len(pcm))
+open(DSTPATH,"w").write(hdr+pcm)
