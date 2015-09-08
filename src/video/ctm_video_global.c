@@ -68,6 +68,7 @@ int ctm_video_init(int fullscreen) {
   if (!(ctm_video.texid_logo_tie=ctm_video_load_png("logo-tie.png",1))) return -1;
   if (!(ctm_video.texid_uisprites=ctm_video_load_png("uisprites.png",0))) return -1;
   if (!(ctm_video.texid_title=ctm_video_load_png("title.png",1))) return -1;
+  if (!(ctm_video.texid_introbg=ctm_video_load_png("introbg.png",1))) return -1;
   if (!(ctm_video.texid_tinyfont=ctm_video_load_png("tinyfont.png",0))) return -1;
   if (!(ctm_video.texid_bunting=ctm_video_load_png("bunting.png",1))) return -1;
 
@@ -88,6 +89,7 @@ void ctm_video_quit() {
   if (ctm_video.texid_logo_tie) glDeleteTextures(1,&ctm_video.texid_logo_tie);
   if (ctm_video.texid_uisprites) glDeleteTextures(1,&ctm_video.texid_uisprites);
   if (ctm_video.texid_title) glDeleteTextures(1,&ctm_video.texid_title);
+  if (ctm_video.texid_introbg) glDeleteTextures(1,&ctm_video.texid_introbg);
   if (ctm_video.texid_tinyfont) glDeleteTextures(1,&ctm_video.texid_tinyfont);
   if (ctm_video.texid_bunting) glDeleteTextures(1,&ctm_video.texid_bunting);
 

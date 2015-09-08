@@ -75,6 +75,7 @@ extern struct ctm_video {
   GLuint texid_logo_tie;
   GLuint texid_uisprites;
   GLuint texid_title;
+  GLuint texid_introbg;
   GLuint texid_tinyfont;
   GLuint texid_bunting;
   GLuint location_tex_alpha; // 'tex' shader has a uniform alpha multiplier -- please reset to 1.0 when you're done!

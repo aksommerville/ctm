@@ -235,6 +235,34 @@ static int ctm_mainmenu_draw_sprites_DIFFICULTY(struct ctm_display *display,int 
   return 0;
 }
 
+/* Clear background.
+ */
+
+static int ctm_mainmenu_clear_background(struct ctm_display *display) {
+  if (ctm_video.texid_introbg) {
+
+    // Bind to the larger axis and let it overflow the other.
+    // Source texture is square.
+    int x,y,w,h;
+    if (display->fbw>=display->fbh) {
+      w=h=display->fbw;
+      x=0;
+      y=(display->fbh>>1)-(display->fbw>>1);
+    } else {
+      w=h=display->fbh;
+      y=0;
+      x=(display->fbw>>1)-(display->fbh>>1);
+    }
+      
+    if (ctm_draw_texture(x,y,w,h,ctm_video.texid_introbg,0)<0) return -1;
+    
+  } else {
+    glClearColor(0.3,0.1,0.0,1.0);
+    glClear(GL_COLOR_BUFFER_BIT);
+  }
+  return 0;
+}
+
 /* Draw framebuffer, main.
  */
 
@@ -251,8 +279,7 @@ static int _ctm_display_mainmenu_draw_fb(struct ctm_display *display) {
   }
 
   /* Clear screen and draw common constant elements. */
-  glClearColor(0.3,0.1,0.0,1.0);
-  glClear(GL_COLOR_BUFFER_BIT);
+  if (ctm_mainmenu_clear_background(display)<0) return -1;
   if (ctm_mainmenu_draw_title(display)<0) return -1;
   int optw=CTM_RESIZE(400),opth=CTM_RESIZE(50);
   int optx=(display->fbw>>1)-(optw>>1);
