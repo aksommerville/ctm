@@ -228,8 +228,14 @@ static int ctm_player_swing_sword(struct ctm_sprite *spr) {
   CTM_SFX(SWORD)
 
   // Cancel any movement in progress.
-  if (ctm_player_unset_motion(spr,SPR->dx,0)<0) return -1;
-  if (ctm_player_unset_motion(spr,0,SPR->dy)<0) return -1;
+  // Order matters here! If diagonal, we must remove the axis he is facing LAST, to stab in that direction.
+  if (SPR->col==2) { // Facing horizontally.
+    if (ctm_player_unset_motion(spr,0,SPR->dy)<0) return -1;
+    if (ctm_player_unset_motion(spr,SPR->dx,0)<0) return -1;
+  } else { // Facing vertically.
+    if (ctm_player_unset_motion(spr,SPR->dx,0)<0) return -1;
+    if (ctm_player_unset_motion(spr,0,SPR->dy)<0) return -1;
+  }
 
   SPR->speaking=0;
   SPR->swinging=CTM_PLAYER_SWORD_TIME;

@@ -17,6 +17,7 @@
 #define CTM_CONSIDER_COUNT 5 // Voters per frame, for idle consideration.
 #define CTM_STATE_PREDICTION_TIME 120 // Frames, how often to update state predictions, when a menu is open.
 #define CTM_NEWS_MODAL_TIME 40 // Frames
+#define CTM_NEWS_AUTODISMISS_TIME 600 // Frames
 
 // If we don't have so many beasts afield, create one. (each frame).
 #define CTM_BEAST_PREFERRED_LEVEL 4
@@ -75,9 +76,23 @@ static int ctm_game_vote() {
   // Assign player awards.
   if (ctm_decide_player_awards()<0) return -1;
 
+  // If a newspaper is visible, dismiss it.
+  ctm_display_end_news();
+
   //if (ctm_display_rebuild_gameover()<0) return -1;
   
   return 0;
+}
+
+/* Check how long the newspaper has been visible, and dismiss it automatically after a given duration.
+ */
+
+static void ctm_game_dismiss_news_if_stale() {
+  ctm_game.news_autodismiss_counter++;
+  if (ctm_game.news_autodismiss_counter<CTM_NEWS_AUTODISMISS_TIME) return;
+      ctm_audio_effect(CTM_AUDIO_EFFECTID_DISMISS_NEWS,0xff);
+  ctm_display_end_news();
+  ctm_game.news_counter=0;
 }
 
 /* Update, while game is running.
@@ -130,11 +145,13 @@ static int ctm_game_update_play() {
     if (!--(ctm_game.news_counter)) ctm_game.news_counter=-1;
     return 0;
   } else if (ctm_game.news_counter==-1) {
+    ctm_game_dismiss_news_if_stale();
     for (i=1;i<=4;i++) if (ctm_input_by_playerid[i]&CTM_BTNID_ANYKEY) {
       ctm_game.news_counter=-2;
     }
     return 0;
   } else if (ctm_game.news_counter==-2) {
+    ctm_game_dismiss_news_if_stale();
     int zero=1;
     for (i=1;i<4;i++) if (ctm_input_by_playerid[i]&CTM_BTNID_ANYKEY) zero=0;
     if (zero) {
@@ -149,6 +166,7 @@ static int ctm_game_update_play() {
     if (ctm_perform_broad_event(event->stateix,event->party,ctm_game.werewolf_party,event->favor)<0) return -1;
     if (ctm_display_begin_news(event->stateix,event->party)<0) return -1;
     ctm_game.news_counter=CTM_NEWS_MODAL_TIME;
+    ctm_game.news_autodismiss_counter=0;
   }
 
   /* Run idle consideration for voters. */

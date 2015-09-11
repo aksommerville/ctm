@@ -47,7 +47,9 @@ static void _ctm_buffalo_del(struct ctm_sprite *spr) {
 static int _ctm_buffalo_draw(struct ctm_sprite *spr,int addx,int addy) {
 
   int linkc=0;
-  if (SPR->extension) linkc=(SPR->extension+CTM_BUFFALO_LINKC_ADD)/CTM_BUFFALO_LINKC_DIVIDE;
+  if (SPR->extension) {
+    linkc=(CTM_BUFFALO_EXTENSION_LIMIT+CTM_TILESIZE)/(CTM_TILESIZE>>1);
+  }
   int vtxc=linkc+2;
   struct ctm_vertex_sprite *vtxv=ctm_add_sprites(vtxc);
   if (!vtxv) return -1;

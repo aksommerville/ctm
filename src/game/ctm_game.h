@@ -43,6 +43,7 @@ extern struct ctm_game {
   int difficulty;
 
   int news_counter; // While counting down, input is disabled. If negative, the news is still displayed
+  int news_autodismiss_counter; // Counts up while news is dismissable; drops paper after a time.
   struct ctm_werewolf_event *werewolf_eventv;
   int werewolf_eventc;
   int werewolf_eventp; // How many werewolf events completed?
