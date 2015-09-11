@@ -6,6 +6,8 @@
 #define CTM_MENUW_MIN CTM_RESIZE(512)
 #define CTM_MENUH_MIN CTM_RESIZE(384)
 
+#define CTM_MAINMENU_OPTIONS_COLOR 0xa07040ff
+
 /* Object type.
  */
 
@@ -284,7 +286,7 @@ static int _ctm_display_mainmenu_draw_fb(struct ctm_display *display) {
   int optw=CTM_RESIZE(400),opth=CTM_RESIZE(50);
   int optx=(display->fbw>>1)-(optw>>1);
   int opty=CTM_RESIZE(256)+((display->fbh-CTM_RESIZE(256))>>1)-(opth>>1);
-  if (ctm_draw_rect(optx,opty,optw,opth,0x301000ff)<0) return -1;
+  if (ctm_draw_rect(optx,opty,optw,opth,CTM_MAINMENU_OPTIONS_COLOR)<0) return -1;
 
   /* Place sprites for each phase. */
   if (ctm_video_begin_sprites()<0) return -1;
