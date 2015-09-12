@@ -16,9 +16,11 @@ mkdir -p mid || exit 1
 TESTLIST=mid/ctm-tests
 echo > $TESTLIST
 
+if [ "$(uname -s)" != MINGW32_NT-6.1 ] ; then
 for SRCPATH in $(find src/test -name '*.c') ; do
   nl -ba -s' ' $SRCPATH | sed -En 's,^ *([0-9]+) *CTM_UNIT_TEST\(([0-9a-zA-Z_]+)\).*$,'"$SRCPATH"' \1 \2,p' >> $TESTLIST
 done
+fi
 
 echo > "$DSTPATH"
 

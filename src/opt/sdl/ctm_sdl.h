@@ -4,9 +4,9 @@
 #ifndef CTM_SDL_H
 #define CTM_SDL_H
 
-#if CTM_ARCH==CTM_ARCH_mswin // As usual, Windows requires that everything be done differently.
+#if CTM_ARCH==CTM_ARCH_mswin && 0 // As usual, Windows requires that everything be done differently.
   #define GLEW_STATIC 1
-  #include <GL/glew.h>
+  #include <SDL_opengl.h>
   #include <SDL.h>
 #else
 

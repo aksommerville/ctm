@@ -115,7 +115,7 @@ int ctm_sdl_init(int fullscreen) {
   
   SDL_ShowCursor(0);
   
-  #if CTM_ARCH==CTM_ARCH_mswin
+  #if CTM_ARCH==CTM_ARCH_mswin && 0
     glewInit();
     if (!glewIsSupported("GL_VERSION_2_0")) {
       fprintf(stderr,"ctm: OpenGL 2.x or greater required.\n");

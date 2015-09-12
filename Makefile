@@ -1,6 +1,8 @@
 all:
-.SILENT:
+#.SILENT:
 PRECMD=echo "  $(@F)" ; mkdir -p $(@D) ;
+
+FIND:=/bin/find
 
 #------------------------------------------------------------------------------
 # Compile-time configuration.
@@ -24,7 +26,7 @@ ifndef CTM_CONFIG
     endif
   else ifeq ($(UNAMES),Darwin)
     CTM_CONFIG:=macos
-  else ifeq ($(firstword,$(subst _, ,$(UNAMES))),MINGW32)
+  else ifeq ($(firstword $(subst _, ,$(UNAMES))),MINGW32)
     CTM_CONFIG:=mswin
   else
     $(error Unable to guess configuration)
@@ -108,9 +110,9 @@ else ifeq ($(CTM_CONFIG),macos-glx) # ----- MacOS X with GLX (must request expli
 
 else ifeq ($(CTM_CONFIG),mswin) # ----- Microsoft Windows -----
 
-  CC:=gcc -c -MMD -O2 -Isrc -Werror -Wimplicit -Wformat -DCTM_ARCH=CTM_ARCH_mswin
+  CC:=gcc -c -MMD -O2 -Isrc -Werror -Wimplicit -Wformat -DCTM_ARCH=CTM_ARCH_mswin -Ietc/windows-external -Ietc/windows-external/SDL
   LD:=gcc
-  LDPOST:=-lz -lm -lSDL
+  LDPOST:=etc/windows-external/zlib1.dll -lm etc/windows-external/libSDL.dll.a etc/windows-external/pthreadGC2.dll etc/windows-external/opengl32.dll
 
   OPT:=sdl
   
