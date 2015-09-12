@@ -100,7 +100,7 @@ static int ctm_display_gameover_draw_demographics(struct ctm_display *display,in
 static int ctm_display_gameover_draw_scatter_bar(struct ctm_display *display,int x,int y,int w,int h,struct ctm_sprgrp *grp) {
   int midw=w>>1;
   int midx=x+midw;
-  if (ctm_draw_rect(x,y,w,h,0x808080ff)<0) return -1;
+  if (ctm_draw_rect(x,y,w,h,0x706050ff)<0) return -1;
   if (ctm_draw_rect(midx,y,1,h,0x000000ff)<0) return -1;
   if (ctm_video_begin_tiles()<0) return -1;
   int i; for (i=0;i<grp->sprc;i++) {
@@ -112,7 +112,7 @@ static int ctm_display_gameover_draw_scatter_bar(struct ctm_display *display,int
     if (!vtx) return -1;
     vtx->tile=0x60+SPR->party;
     vtx->x=midx+(SPR->decision*midw)/128;
-    vtx->y=y+(SPR->party*h)/7+2;
+    vtx->y=y+(SPR->party*h)/7+CTM_RESIZE(2);
     if (SPR->party>=3) vtx->y--;
   }
   if (ctm_video_end_tiles(ctm_video.texid_uisprites)<0) return -1;

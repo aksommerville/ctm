@@ -684,7 +684,7 @@ static int ctm_display_game_draw_national_map(struct ctm_display *display,struct
 static int ctm_display_game_draw_sentiment(struct ctm_display *display,int x,int y,int w,int h,int stateix) {
   int midw=w>>1;
   int midx=x+midw;
-  if (ctm_draw_rect(x,y,w,h,0x808080ff)<0) return -1;
+  if (ctm_draw_rect(x,y,w,h,0x706050ff)<0) return -1;
   if (ctm_draw_rect(midx,y,1,h,0x000000ff)<0) return -1;
   if (ctm_video_begin_tiles()<0) return -1;
   int i; for (i=0;i<ctm_group_state_voter[stateix].sprc;i++) {
@@ -696,7 +696,7 @@ static int ctm_display_game_draw_sentiment(struct ctm_display *display,int x,int
     if (!vtx) return -1;
     vtx->tile=0x60+SPR->party;
     vtx->x=midx+(SPR->decision*midw)/128;
-    vtx->y=y+(SPR->party*h)/CTM_RESIZE(7)+CTM_RESIZE(2);
+    vtx->y=y+(SPR->party*h)/7+CTM_RESIZE(2);
     if (SPR->party>=3) vtx->y-=CTM_RESIZE(1);
   }
   if (ctm_video_end_tiles(ctm_video.texid_uisprites)<0) return -1;
