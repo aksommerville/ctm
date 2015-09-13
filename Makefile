@@ -1,5 +1,5 @@
 all:
-#.SILENT:
+.SILENT:
 PRECMD=echo "  $(@F)" ; mkdir -p $(@D) ;
 
 FIND:=/bin/find
