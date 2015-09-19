@@ -428,7 +428,7 @@ static int ctm_display_game_draw_WINLOSE(struct ctm_display *display,struct ctm_
   int tilebase;
   if (result->elecblue>result->elecred) tilebase=(SPR->party==CTM_PARTY_BLUE)?0x00:0x20;
   else if (result->elecblue<result->elecred) tilebase=(SPR->party==CTM_PARTY_RED)?0x00:0x20;
-  else tilebase=0x20; // Tie! Everybody loses!
+  else tilebase=0xb0;
   uint8_t r=ctm_party_color[SPR->party]>>24;
   uint8_t g=ctm_party_color[SPR->party]>>16;
   uint8_t b=ctm_party_color[SPR->party]>>8;

@@ -324,6 +324,8 @@ static int ctm_display_gameover_draw_nationwide(struct ctm_display *display,int 
     if (ctm_video_add_textf(textx,y+CTM_RESIZE(8),0xffff00ff,"Blue won the popular vote.")<0) return -1; y+=CTM_RESIZE(16);
   } else if (result->totalblue&&(result->totalblue==result->totalred)) {
     if (ctm_video_add_textf(textx,y+CTM_RESIZE(8),0xffff00ff,"Popular vote tied at %d.",result->totalblue)<0) return -1; y+=CTM_RESIZE(16);
+  } else if (!result->totalblue&&!result->totalred) {
+    if (ctm_video_add_textf(textx,y+CTM_RESIZE(8),0xffff00ff,"No living voters!")<0) return -1; y+=CTM_RESIZE(16);
   } else if (!result->totalblue||!result->totalred) {
     if (ctm_video_add_textf(textx,y+CTM_RESIZE(8),0xffff00ff,"Popular vote unanimous!")<0) return -1; y+=CTM_RESIZE(16);
   }
