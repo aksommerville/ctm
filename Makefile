@@ -146,7 +146,7 @@ else ifeq ($(CTM_CONFIG),mswin-viamacos) # ----- Microsoft Windows, cross-compil
   SDLLD:=$(shell /usr/local/i386-mingw32-4.3.0/i386-mingw32/bin/sdl-config --libs)
 
   CC:=$(GCCPFX)gcc -c -MMD -O2 -Isrc -Werror -Wimplicit -Wformat -DCTM_ARCH=CTM_ARCH_mswin $(SDLC)
-  LD:=$(GCCPFX)gcc
+  LD:=$(GCCPFX)gcc 
   LDPOST:=$(SDLLD) -lglew32s -lopengl32 -lzlib1 -lm -lpthreadGC2
 
   OPT:=sdl
