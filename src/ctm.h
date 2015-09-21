@@ -32,6 +32,12 @@
   #define LITTLE_ENDIAN 1234
   #define BIG_ENDIAN    4321
   #define BYTE_ORDER LITTLE_ENDIAN
+
+  // Fucking SDL redirects our output to a text file for some reason.
+  // Adding fflush() after every printf() helps ensure that the text is preserved even after a crash.
+  // This being Windows, we do need to be ready to crash. :)
+  #define printf(fmt,...) ({ printf(fmt,##__VA_ARGS__); fflush(stdout); })
+  #define fprintf(f,fmt,...) ({ fprintf(f,fmt,##__VA_ARGS__); fflush(f); })
   
 #else
   #error "Illegal value for CTM_ARCH."

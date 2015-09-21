@@ -71,6 +71,8 @@ int ctm_sdl_init(int fullscreen) {
   if (ctm_sdl.videoinit) return -1;
   if (SDL_InitSubSystem(SDL_INIT_VIDEO)) return -1;
 
+  SDL_GL_SetAttribute(SDL_GL_SWAP_CONTROL,1);
+
   SDL_WM_SetCaption("The Campaign Trail of the Mummy","The Campaign Trail of the Mummy");
   if (ctm_sdl.icon=SDL_CreateRGBSurfaceFrom(
     (void*)ctm_program_icon,ctm_program_icon_w,ctm_program_icon_h,32,ctm_program_icon_w<<2,
@@ -112,17 +114,19 @@ int ctm_sdl_init(int fullscreen) {
   }
   ctm_screenw=ctm_sdl.screen->w;
   ctm_screenh=ctm_sdl.screen->h;
+
+  SDL_GL_SetAttribute(SDL_GL_SWAP_CONTROL,1);
   
   SDL_ShowCursor(0);
   
-  #if CTM_ARCH==CTM_ARCH_mswin && 0
+  #if CTM_ARCH==CTM_ARCH_mswin
     glewInit();
     if (!glewIsSupported("GL_VERSION_2_0")) {
       fprintf(stderr,"ctm: OpenGL 2.x or greater required.\n");
       return -1;
     }
   #endif
-  
+
   return 0;
 }
 
@@ -419,7 +423,7 @@ void ctm_sdl_quit_audio() {
 
 /* Swap framebuffer.
  */
-
+ 
 int ctm_sdl_swap() {
   SDL_GL_SwapBuffers();
   return 0;

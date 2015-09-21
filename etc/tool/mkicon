@@ -7,7 +7,7 @@ if len(sys.argv)!=3:
 
 varname=os.path.basename(sys.argv[2]).split('.')[0]
 
-src=open(sys.argv[1],'r').read()
+src=open(sys.argv[1],'rb').read()
 pixelc=len(src)/4
 w=int(math.sqrt(pixelc))
 h=pixelc/w
@@ -18,7 +18,7 @@ if w*h*4!=len(src):
 dst="const unsigned char %s[]={\n"%(varname)
 linelen=0
 for ch in src:
-  dst+="0x%02x,"%(ord(ch))
+  dst+="0x%02x,"%(ch)
   linelen+=5
   if linelen>=100:
     dst+="\n"

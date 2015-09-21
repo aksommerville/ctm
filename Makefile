@@ -28,12 +28,16 @@ ifndef CTM_CONFIG
     CTM_CONFIG:=macos
   else ifeq ($(firstword $(subst _, ,$(UNAMES))),MINGW32)
     CTM_CONFIG:=mswin
+  else ifeq ($(firstword $(subst _, ,$(UNAMES))),MINGW64)
+    CTM_CONFIG:=mswin
   else
     $(error Unable to guess configuration)
   endif
 endif
 
 APPSFX:=
+
+addl_app_req:
 
 # We normally choose whether to enable audio based on the optional unit selection.
 # You can forcibly disable it by defining CTM_AUDIO_DISABLE=1.
@@ -108,17 +112,28 @@ else ifeq ($(CTM_CONFIG),macos-glx) # ----- MacOS X with GLX (must request expli
 
   APP:=CampaignTrailOfTheMummy.app/Contents/MacOS/CampaignTrailOfTheMummy
 
-else ifeq ($(CTM_CONFIG),mswin) # ----- Microsoft Windows -----
+else ifeq ($(CTM_CONFIG),mswin) # ----- Microsoft Windows with MinGW -----
 
-  CC:=gcc -c -MMD -O2 -Isrc -Werror -Wimplicit -Wformat -DCTM_ARCH=CTM_ARCH_mswin -Ietc/windows-external -Ietc/windows-external/SDL
-  LD:=gcc
-  LDPOST:=etc/windows-external/zlib1.dll -lm etc/windows-external/libSDL.dll.a etc/windows-external/pthreadGC2.dll etc/windows-external/opengl32.dll
+  INCLUDE:=-I/c/MinGW/include/SDL
+  LDFLAGS:=/c/MinGW/lib/SDL.dll
+
+  CC:=gcc -c -MMD -O2 -Isrc -Werror -Wimplicit -Wformat -DCTM_ARCH=CTM_ARCH_mswin -m32 $(INCLUDE) -DPTW32_STATIC_LIB=1
+  LD:=gcc -static -m32 $(LDFLAGS)
+  LDPOST:=-lmingw32 -lSDLmain -lz -lm -lpthreadGC2 -lglew32s -lglu32 -lopengl32 -lglaux
 
   OPT:=sdl
   
   APPSFX:=.exe
 
-  CC+=-DGLSLVERSION=100
+  CC+=-DGLSLVERSION=120
+
+  OUTPUT_DLLS:=$(addprefix out/mswin/,SDL.dll)
+  out/mswin/pthreadGC2.dll:/c/MinGW/bin/pthreadGC2.dll;$(PRECMD) cp $< $@
+  out/mswin/SDL.dll:/c/MinGW/lib/SDL.dll;$(PRECMD) cp $< $@
+  /c/MinGW/bin/pthreadGC2.dll:
+  /c/MinGW/lib/SDL.dll:
+  addl_app_req:$(OUTPUT_DLLS) out/mswin/ctm-data
+  out/mswin/ctm-data:;cp -r ctm-data out/mswin/ctm-data
 
 else ifeq ($(CTM_CONFIG),mswin-vialinux) # ----- Microsoft Windows, cross-compiled from my Linux box. -----
 
@@ -219,13 +234,13 @@ else
   TEST:=$(OUTDIR)/ctm-test$(APPSFX)
 endif
 
-all:$(APP)
+all:$(APP) addl_app_req
 $(APP):$(OFILES_APP);$(PRECMD) $(LD) -o $@ $^ $(LDPOST)
 
-all:$(EDITOR)
+all:$(EDITOR) addl_app_req
 $(EDITOR):$(OFILES_EDITOR);$(PRECMD) $(LD) -o $@ $^ $(LDPOST)
 
-all:$(TEST)
+all:$(TEST) addl_app_req
 $(TEST):$(OFILES_TEST);$(PRECMD) $(LD) -o $@ $^ $(LDPOST)
 
 #------------------------------------------------------------------------------
