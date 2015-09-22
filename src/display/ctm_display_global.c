@@ -160,9 +160,9 @@ int ctm_display_draw() {
   for (i=0;i<ctm_displays.c;i++) {
     struct ctm_display *display=ctm_displays.v[i];
     if (display->type==&ctm_display_type_modal) continue;
-    if (display->type->draw&&0) {
+    if (display->type->draw) {
       if (display->type->draw(display)<0) return -1;
-    } else if (display->fbtexid&&0) {
+    } else if (display->fbtexid) {
       if (ctm_draw_texture(display->x,display->y,display->w,display->h,display->fbtexid,1)<0) return -1;
     }
   }
