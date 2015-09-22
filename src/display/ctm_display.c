@@ -53,9 +53,11 @@ int ctm_display_resize_fb(struct ctm_display *display,int fbw,int fbh) {
 
   // Allocate framebuffer.
   if (!display->fb) {
-    glGenFramebuffers(1,&display->fb);
-    if (!display->fb) glGenFramebuffers(1,&display->fb);
-    if (!display->fb) return -1;
+    GLuint fb=0;
+    glGenFramebuffers(1,&fb);
+    if (!fb) glGenFramebuffers(1,&fb);
+    if (!fb) return -1;
+    display->fb=fb;
     glBindFramebuffer(GL_FRAMEBUFFER,display->fb);
     glFramebufferTexture2D(GL_FRAMEBUFFER,GL_COLOR_ATTACHMENT0,GL_TEXTURE_2D,display->fbtexid,0);
     int status=glCheckFramebufferStatus(GL_FRAMEBUFFER);
@@ -65,7 +67,7 @@ int ctm_display_resize_fb(struct ctm_display *display,int fbw,int fbh) {
 
   display->fbw=fbw;
   display->fbh=fbh;
-  
+
   return 0;
 }
 

@@ -64,8 +64,7 @@ static int _ctm_display_game_init(struct ctm_display *display) {
   glBindFramebuffer(GL_FRAMEBUFFER,DISPLAY->fb_report);
   glFramebufferTexture2D(GL_FRAMEBUFFER,GL_COLOR_ATTACHMENT0,GL_TEXTURE_2D,DISPLAY->texid_report,0);
   glBindFramebuffer(GL_FRAMEBUFFER,0);
-  
-  
+
   return 0;
 }
 

@@ -6,6 +6,9 @@
 
 #if CTM_ARCH==CTM_ARCH_mswin // As usual, Windows requires that everything be done differently.
   #define GLEW_STATIC 1
+  #define GL_GLEXT_PROTOTYPES 1
+  //#include <GL/gl.h>
+  //#include <GL/glext.h>
   #include <GL/glew.h>
   #include <SDL.h>
 #else
@@ -19,11 +22,13 @@
   #define GL_FRAMEBUFFER_COMPLETE GL_FRAMEBUFFER_COMPLETE_EXT
   #define GL_COLOR_ATTACHMENT0 GL_COLOR_ATTACHMENT0_EXT
   #define GL_PROGRAM_POINT_SIZE 0x8642
+  /**/
   #define glDeleteFramebuffers glDeleteFramebuffersEXT
   #define glGenFramebuffers glGenFramebuffersEXT
   #define glBindFramebuffer glBindFramebufferEXT
   #define glFramebufferTexture2D glFramebufferTexture2DEXT
   #define glCheckFramebufferStatus glCheckFramebufferStatusEXT
+  /**/
 #endif
 
 int ctm_sdl_init(int fullscreen);

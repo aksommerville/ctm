@@ -35,6 +35,7 @@ int ctm_video_init(int fullscreen) {
   #ifdef __gl_h_ // Desktop OpenGL.
     glEnable(GL_POINT_SPRITE);
     glEnable(GL_PROGRAM_POINT_SIZE);
+    glTexEnvi(GL_POINT_SPRITE, GL_COORD_REPLACE, GL_TRUE);
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
     #if CTM_ARCH==CTM_ARCH_macos // MacOS/GLX requires this; Linux/GLX does not.
@@ -45,7 +46,10 @@ int ctm_video_init(int fullscreen) {
   #endif
 
   #define ONCE(tag) \
-    if (ctm_shader_compile(&ctm_shader_##tag)<0) return -1; \
+    if (ctm_shader_compile(&ctm_shader_##tag)<0) { \
+      printf("ctm_shader_compile(%s) failed\n",#tag); \
+      return -1; \
+    } \
     glUseProgram(ctm_shader_##tag.program); \
     glUniform2f(ctm_shader_##tag.location_screensize,ctm_screenw,ctm_screenh); \
     glUniform2f(ctm_shader_##tag.location_tilesize,CTM_TILESIZE,CTM_TILESIZE);
