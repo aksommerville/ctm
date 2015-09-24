@@ -18,7 +18,7 @@ if w*h*4!=len(src):
 dst="const unsigned char %s[]={\n"%(varname)
 linelen=0
 for ch in src:
-  dst+="0x%02x,"%(ch)
+  dst+="0x%02x,"%(ord(ch))
   linelen+=5
   if linelen>=100:
     dst+="\n"

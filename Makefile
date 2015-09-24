@@ -2,7 +2,8 @@ all:
 .SILENT:
 PRECMD=echo "  $(@F)" ; mkdir -p $(@D) ;
 
-FIND:=/bin/find
+#FIND:=$(shell which find)
+#$(info $(SHELL))
 
 #------------------------------------------------------------------------------
 # Compile-time configuration.
