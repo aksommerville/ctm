@@ -35,7 +35,7 @@ int ctm_video_init(int fullscreen) {
   #ifdef __gl_h_ // Desktop OpenGL.
     glEnable(GL_POINT_SPRITE);
     glEnable(GL_PROGRAM_POINT_SIZE);
-    glTexEnvi(GL_POINT_SPRITE, GL_COORD_REPLACE, GL_TRUE);
+    //glTexEnvi(GL_POINT_SPRITE, GL_COORD_REPLACE, GL_TRUE);
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
     #if CTM_ARCH==CTM_ARCH_macos // MacOS/GLX requires this; Linux/GLX does not.

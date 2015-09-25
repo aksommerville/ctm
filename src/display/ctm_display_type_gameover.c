@@ -1,5 +1,6 @@
 #include "ctm.h"
 #include "ctm_display.h"
+#include "ctm_scatter_graph.h"
 #include "video/ctm_video_internal.h"
 #include "game/ctm_geography.h"
 #include "game/ctm_game.h"
@@ -98,6 +99,7 @@ static int ctm_display_gameover_draw_demographics(struct ctm_display *display,in
  */
 
 static int ctm_display_gameover_draw_scatter_bar(struct ctm_display *display,int x,int y,int w,int h,struct ctm_sprgrp *grp) {
+//XXX unused
   int midw=w>>1;
   int midx=x+midw;
   if (ctm_draw_rect(x,y,w,h,0x706050ff)<0) return -1;
@@ -239,7 +241,7 @@ static int ctm_display_gameover_draw_nationwide(struct ctm_display *display,int 
   // Election results.
   if (ctm_display_gameover_draw_national_map(display,midx-CTM_RESIZE(56),topy,CTM_RESIZE(52),CTM_RESIZE(52),result)<0) return -1;
   if (ctm_display_gameover_draw_demographics(display,midx+CTM_RESIZE(4),topy,CTM_RESIZE(52),CTM_RESIZE(52),&ctm_group_voter)<0) return -1;
-  if (ctm_display_gameover_draw_scatter_bar(display,limitx+CTM_RESIZE(32),topy+CTM_RESIZE(68),limitw-CTM_RESIZE(64),CTM_RESIZE(16),&ctm_group_voter)<0) return -1;
+  if (ctm_scatter_graph_draw(limitx+CTM_RESIZE(32),topy+CTM_RESIZE(68),limitw-CTM_RESIZE(64),CTM_RESIZE(15),&ctm_group_voter)<0) return -1;
   if (ctm_display_gameover_draw_summary_bar(display,limitx+CTM_RESIZE(32),topy+CTM_RESIZE(92),limitw-CTM_RESIZE(64),CTM_RESIZE(16),-1,result)<0) return -1;
 
   // Draw results for each player and the werewolf.
@@ -354,8 +356,10 @@ static int ctm_display_gameover_draw_state(struct ctm_display *display,int x,int
 
   // Split the remaining horizontal space in two ribbons, and draw scatter and summary.
   x+=h<<1; w-=h<<1;
-  if (ctm_display_gameover_draw_scatter_bar(display,x,y,w,h>>1,ctm_group_state_voter+stateix)<0) return -1;
-  if (ctm_display_gameover_draw_summary_bar(display,x,y+(h>>1),w,h-(h>>1),stateix,result)<0) return -1;
+  int toph=ctm_scatter_graph_choose_height(h>>1,h);
+  int bottomh=h-toph;
+  if (ctm_scatter_graph_draw(x,y,w,toph,ctm_group_state_voter+stateix)<0) return -1;
+  if (ctm_display_gameover_draw_summary_bar(display,x,y+toph,w,bottomh,stateix,result)<0) return -1;
   
   return 0;
 }
