@@ -248,6 +248,10 @@ static int ctm_sdl_welcome_joystick(SDL_Joystick *sdljoy,const char *name,int sd
   if (joy->axisc&&!(joy->axisv=calloc(2,joy->axisc))) { ctm_joystick_del(joy); return -1; }
   if (joy->hatc&&!(joy->hatv=calloc(1,joy->hatc))) { ctm_joystick_del(joy); return -1; }
 
+  printf("    btnc %d\n",joy->btnc);
+  printf("    axisc %d\n",joy->axisc);
+  printf("    hatc %d\n",joy->hatc);
+
   if (joy->def=ctm_input_get_definition(joy->name,joy->namec)) {
     if (ctm_joystick_setup_map(joy)<0) return -1;
   } else {
@@ -339,14 +343,17 @@ int ctm_sdl_init_input() {
     if (ctm_sdl_add_keymap(SDLK_c,CTM_BTNID_TERTIARY)<0) return -1;
     if (ctm_sdl_add_keymap(SDLK_RETURN,CTM_BTNID_PAUSE)<0) return -1;
   }
-  
+
+  printf("Initializing joysticks...\n");
   if (SDL_InitSubSystem(SDL_INIT_JOYSTICK)) return -1;
   ctm_sdl.inputinit=1;
   int joyc=SDL_NumJoysticks();
+  printf("...detected %d joystick%s\n",joyc,(joyc==1)?"":"s");
   if (joyc>0) {
     int i; for (i=0;i<joyc;i++) {
       const char *joyname=SDL_JoystickName(i);
       if (!joyname) joyname="(Joystick)";
+      printf("  [%d] %s\n",i,joyname);
       SDL_Joystick *sdljoy=SDL_JoystickOpen(i);
       if (sdljoy) {
         if (ctm_sdl_welcome_joystick(sdljoy,joyname,i)<0) return -1;

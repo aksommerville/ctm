@@ -35,6 +35,8 @@ int ctm_display_resize_fb(struct ctm_display *display,int fbw,int fbh) {
   if ((fbw<1)||(fbh<1)) return -1;
   if ((fbw==display->fbw)&&(fbh==display->fbh)) return 0;
 
+  #if !CTM_TEST_DISABLE_VIDEO
+
   // Allocate texture.
   if (!display->fbtexid) {
     glGenTextures(1,&display->fbtexid);
@@ -64,6 +66,8 @@ int ctm_display_resize_fb(struct ctm_display *display,int fbw,int fbh) {
     glBindFramebuffer(GL_FRAMEBUFFER,0);
     if (status!=GL_FRAMEBUFFER_COMPLETE) return -1;
   }
+
+  #endif
 
   display->fbw=fbw;
   display->fbh=fbh;

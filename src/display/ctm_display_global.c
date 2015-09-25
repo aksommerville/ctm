@@ -115,6 +115,10 @@ static int ctm_display_draw_newspaper() {
 int ctm_display_draw() {
   int i;
 
+  #if CTM_TEST_DISABLE_VIDEO
+    return 0;
+  #endif
+
   /* Clear framebuffer if necessary. Clearing is a bit expensive and is usually not necessary. */
   int must_clear=1;
   if (ctm_displays.c>0) {
@@ -438,6 +442,12 @@ struct ctm_display *ctm_display_get_modal() {
  */
  
 struct ctm_display *ctm_display_begin_modal() {
+
+  #if CTM_TEST_DISABLE_VIDEO
+    printf("ctm_display_begin_modal\n");
+    return 0;
+  #endif
+
   struct ctm_display *display=ctm_display_get_modal();
   if (display) {
     ctm_display_modal_reset(display);
@@ -466,6 +476,11 @@ void ctm_display_end_modal() {
  */
  
 int ctm_display_begin_news(int stateix,int party) {
+
+  #if CTM_TEST_DISABLE_VIDEO
+    return 0;
+  #endif
+
   GLuint texid=ctm_generate_newspaper(stateix,party);
   if (!texid) return -1;
   if (ctm_displays.news_texid) glDeleteTextures(1,&ctm_displays.news_texid);

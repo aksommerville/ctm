@@ -15,6 +15,14 @@
 #define CTM_ARCH_macos 3
 #define CTM_ARCH_mswin 4
 
+/* Andy uses this on his Windows box when needed to run audio or input tests.
+ * Nonzero will forcibly disable OpenGL 2.x, which effectively means no video at all.
+ */
+#define CTM_TEST_DISABLE_VIDEO 0
+#if CTM_TEST_DISABLE_VIDEO
+  #pragma message("CTM_TEST_DISABLE_VIDEO enabled; all video output will be suppressed.")
+#endif
+
 #if CTM_ARCH==CTM_ARCH_linux
   #define CTM_ARCH_NAME "Linux"
   #include <endian.h>

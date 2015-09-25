@@ -45,6 +45,7 @@ int ctm_video_init(int fullscreen) {
     glBlendFuncSeparate(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA,GL_SRC_ALPHA,GL_DST_ALPHA);
   #endif
 
+  #if !CTM_TEST_DISABLE_VIDEO
   #define ONCE(tag) \
     if (ctm_shader_compile(&ctm_shader_##tag)<0) { \
       printf("ctm_shader_compile(%s) failed\n",#tag); \
@@ -62,6 +63,7 @@ int ctm_video_init(int fullscreen) {
   glUseProgram(ctm_shader_text.program);
   ctm_video.location_text_size=glGetUniformLocation(ctm_shader_text.program,"size");
   ctm_video.textsize=16;
+  #endif
 
   if (!(ctm_video.texid_exterior=ctm_video_load_png("exterior.png",0))) return -1;
   if (!(ctm_video.texid_interior=ctm_video_load_png("interior.png",0))) return -1;
@@ -97,9 +99,11 @@ void ctm_video_quit() {
   if (ctm_video.texid_tinyfont) glDeleteTextures(1,&ctm_video.texid_tinyfont);
   if (ctm_video.texid_bunting) glDeleteTextures(1,&ctm_video.texid_bunting);
 
+  #if !CTM_TEST_DISABLE_VIDEO
   #define ONCE(tag) ctm_shader_cleanup(&ctm_shader_##tag);
   CTM_FOR_EACH_SHADER(ONCE)
   #undef ONCE
+  #endif
 
   #if CTM_USE_bcm
     ctm_bcm_quit();
@@ -155,6 +159,9 @@ int ctm_video_set_fullscreen(int fs) {
  */
  
 int ctm_video_set_uniform_screen_size(int w,int h) {
+  #if CTM_TEST_DISABLE_VIDEO
+    return 0;
+  #else
   #define ONCE(tag) \
     glUseProgram(ctm_shader_##tag.program); \
     glUniform2f(ctm_shader_##tag.location_screensize,w,h); \
@@ -163,9 +170,13 @@ int ctm_video_set_uniform_screen_size(int w,int h) {
   #undef ONCE
   glViewport(0,0,w,h);
   return 0;
+  #endif
 }
 
 int ctm_video_reset_uniform_screen_size() {
+  #if CTM_TEST_DISABLE_VIDEO
+    return 0;
+  #else
   #define ONCE(tag) \
     glUseProgram(ctm_shader_##tag.program); \
     glUniform2f(ctm_shader_##tag.location_screensize,ctm_screenw,ctm_screenh); \
@@ -174,6 +185,7 @@ int ctm_video_reset_uniform_screen_size() {
   #undef ONCE
   glViewport(0,0,ctm_screenw,ctm_screenh);
   return 0;
+  #endif
 }
 
 int ctm_video_screen_size_changed() {

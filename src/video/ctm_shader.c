@@ -1,6 +1,11 @@
 #include "ctm_video_internal.h"
 #include "ctm_shader.h"
 
+#if CTM_TEST_DISABLE_VIDEO
+  void ctm_shader_cleanup(struct ctm_shader *shader) {}
+  int ctm_shader_compile(struct ctm_shader *shader) { return 0; }
+#else
+
 /* Delete shader object.
  */
 
@@ -134,3 +139,5 @@ int ctm_shader_compile(struct ctm_shader *shader) {
   shader->program=0;
   return -1;
 }
+
+#endif
