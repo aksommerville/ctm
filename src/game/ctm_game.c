@@ -127,7 +127,7 @@ static int ctm_game_update_play() {
   /* Update stats periodically. */
   if (--(ctm_game.statstrigger)<=0) {
     ctm_game.statstrigger=CTM_STATSTRIGGER_TIME;
-    //if (ctm_display_game_rebuild_all()<0) return -1;
+    if (ctm_display_game_rebuild_all()<0) return -1;
   }
 
   /* Update state-by-state predictions periodically, if at least one player is paused. */

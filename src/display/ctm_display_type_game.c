@@ -1,5 +1,6 @@
 #include "ctm.h"
 #include "ctm_display.h"
+#include "ctm_scatter_graph.h"
 #include "video/ctm_video_internal.h"
 #include "game/ctm_grid.h"
 #include "game/ctm_game.h"
@@ -683,24 +684,7 @@ static int ctm_display_game_draw_national_map(struct ctm_display *display,struct
  */
 
 static int ctm_display_game_draw_sentiment(struct ctm_display *display,int x,int y,int w,int h,int stateix) {
-  int midw=w>>1;
-  int midx=x+midw;
-  if (ctm_draw_rect(x,y,w,h,0x706050ff)<0) return -1;
-  if (ctm_draw_rect(midx,y,1,h,0x000000ff)<0) return -1;
-  if (ctm_video_begin_tiles()<0) return -1;
-  int i; for (i=0;i<ctm_group_state_voter[stateix].sprc;i++) {
-    struct ctm_sprite *spr=ctm_group_state_voter[stateix].sprv[i];
-    if (spr->type!=&ctm_sprtype_voter) continue;
-    struct ctm_sprite_voter *SPR=(struct ctm_sprite_voter*)spr;
-    if ((SPR->party<0)||(SPR->party>6)) continue;
-    struct ctm_vertex_tile *vtx=ctm_video_vtxv_append(&ctm_shader_tile,1);
-    if (!vtx) return -1;
-    vtx->tile=0x60+SPR->party;
-    vtx->x=midx+(SPR->decision*midw)/128;
-    vtx->y=y+(SPR->party*h)/7+CTM_RESIZE(2);
-    if (SPR->party>=3) vtx->y-=CTM_RESIZE(1);
-  }
-  if (ctm_video_end_tiles(ctm_video.texid_uisprites)<0) return -1;
+  if (ctm_scatter_graph_draw(x,y,w,h,ctm_group_state_voter+stateix)<0) return -1;
   return 0;
 }
 
