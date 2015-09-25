@@ -15,6 +15,9 @@ FIND:=/bin/find
 #   mswin-viamacos
 #CTM_CONFIG:=
 
+# We normally choose whether to enable audio based on the optional unit selection.
+# You can forcibly disable it by defining CTM_AUDIO_DISABLE=1.
+
 ifndef CTM_CONFIG
   UNAMES:=$(shell uname -s)
   ifeq ($(UNAMES),Linux)
@@ -39,142 +42,7 @@ APPSFX:=
 
 addl_app_req:
 
-# We normally choose whether to enable audio based on the optional unit selection.
-# You can forcibly disable it by defining CTM_AUDIO_DISABLE=1.
-
-ifeq ($(CTM_CONFIG),raspi) # ----- Linux on Raspberry Pi -----
-
-  RPIINC:=-I/opt/vc/include -I/opt/vc/include/interface/vcos/pthreads -I/opt/vc/include/interface/vmcs_host/linux
-  RPIBIN:=-L/opt/vc/lib
-  RPILIB:=-lGLESv2 -lpthread -lbcm_host -lEGL
-
-  CC:=gcc -c -MMD -O2 -Isrc -Werror -Wimplicit -Wformat $(RPIINC) -DCTM_ARCH=CTM_ARCH_raspi
-  LD:=gcc $(RPIBIN)
-  LDPOST:=-lz -lm -lasound $(RPILIB)
-
-  OPT:=bcm alsa evdev
-
-  CC+=-DGLSLVERSION=100
-
-else ifeq ($(CTM_CONFIG),linux) # ----- Desktop Linux with GLX/ALSA/evdev -----
-
-  CC:=gcc -c -MMD -O2 -Isrc -Werror -Wimplicit -Wformat -DCTM_ARCH=CTM_ARCH_linux
-  LD:=gcc
-  LDPOST:=-lz -lm -lasound -lX11 -lGL
-
-  OPT:=glx alsa evdev
-
-  CC+=-DGLSLVERSION=100
-  
-else ifeq ($(CTM_CONFIG),linux-sdl) # ----- Desktop Linux with SDL (much more portable) -----
-
-  SDLC:=$(shell sdl-config --cflags)
-  SDLLD:=$(shell sdl-config --libs)
-
-  CC:=gcc -c -MMD -O2 -Isrc -Werror -Wimplicit -Wformat -Wno-parentheses -Wno-pointer-sign -DCTM_ARCH=CTM_ARCH_linux $(SDLC)
-  LD:=gcc $(SDLLD)
-  LDPOST:=-lz -lm -lGL
-
-  CC+=-DGLSLVERSION=100
-
-  OPT:=sdl
-
-else ifeq ($(CTM_CONFIG),macos) # ----- MacOS X with SDL (default) ----- 
-
-  SDLC:=$(shell sdl-config --cflags)
-  SDLLD:=$(patsubst -R%,-L%,$(shell sdl-config --static-libs))
-
-  CC:=gcc -c -MMD -O2 -Isrc -Werror -Wimplicit -Wformat -Wno-parentheses -Wno-pointer-sign -DCTM_ARCH=CTM_ARCH_macos $(SDLC)
-  LD:=gcc $(SDLLD)
-  LDPOST:=-lz -lm -lGL
-
-  CC+=-DGLSLVERSION=120
-
-  OPT:=sdl
-
-  APP:=CampaignTrailOfTheMummy.app/Contents/MacOS/CampaignTrailOfTheMummy
-  POSTRUN:=--fullscreen=1
-
-else ifeq ($(CTM_CONFIG),macos-glx) # ----- MacOS X with GLX (must request explicitly) -----
-# This is not a great choice of drivers. It's only available because I had to write GLX anyway for Linux.
-# There is no audio or joystick support this way.
-
-  XINC:=-I/usr/X11/include
-  XBIN:=-L/usr/X11/lib
-
-  CC:=gcc -c -MMD -O2 -Isrc -Werror -Wimplicit -Wformat -Wno-parentheses -Wno-pointer-sign $(XINC) -DCTM_ARCH=CTM_ARCH_macos
-  LD:=gcc $(XBIN)
-  LDPOST:=-lz -lm -lX11 -lGL
-
-  CC+=-DGLSLVERSION=120
-
-  OPT:=glx
-
-  APP:=CampaignTrailOfTheMummy.app/Contents/MacOS/CampaignTrailOfTheMummy
-
-else ifeq ($(CTM_CONFIG),mswin) # ----- Microsoft Windows with MinGW -----
-
-  INCLUDE:=-I/c/MinGW/include/SDL
-  LDFLAGS:=/c/MinGW/lib/SDL.dll
-
-  CC:=gcc -c -MMD -O2 -Isrc -Werror -Wimplicit -Wformat -DCTM_ARCH=CTM_ARCH_mswin -m32 $(INCLUDE) -DPTW32_STATIC_LIB=1
-  LD:=gcc -static -m32 $(LDFLAGS)
-  LDPOST:=-lmingw32 -lSDLmain -lz -lm -lpthreadGC2 -lglew32s -lglu32 -lopengl32 -lglaux
-
-  OPT:=sdl
-  
-  APPSFX:=.exe
-
-  CC+=-DGLSLVERSION=120
-
-  OUTPUT_DLLS:=$(addprefix out/mswin/,SDL.dll)
-  out/mswin/pthreadGC2.dll:/c/MinGW/bin/pthreadGC2.dll;$(PRECMD) cp $< $@
-  out/mswin/SDL.dll:/c/MinGW/lib/SDL.dll;$(PRECMD) cp $< $@
-  /c/MinGW/bin/pthreadGC2.dll:
-  /c/MinGW/lib/SDL.dll:
-  addl_app_req:$(OUTPUT_DLLS) out/mswin/ctm-data
-  out/mswin/ctm-data:;cp -r ctm-data out/mswin/ctm-data
-
-else ifeq ($(CTM_CONFIG),mswin-vialinux) # ----- Microsoft Windows, cross-compiled from my Linux box. -----
-
-  GCCPFX:=i586-mingw32msvc-
-  
-  SDLC:=$(shell /usr/i586-mingw32msvc/bin/sdl-config --cflags)
-  SDLLD:=$(shell /usr/i586-mingw32msvc/bin/sdl-config --libs)
-
-  CC:=$(GCCPFX)gcc -c -MMD -O2 -Isrc -Werror -Wimplicit -Wformat -DCTM_ARCH=CTM_ARCH_mswin $(SDLC)
-  LD:=$(GCCPFX)gcc
-  LDPOST:=$(SDLLD) -lglew32s -lopengl32 -lzlib1 -lm -lpthreadGC2
-
-  OPT:=sdl
-  
-  APPSFX:=.exe
-  POSTRUN:=& etc/tool/watchstdio
-
-  CC+=-DGLSLVERSION=130
-
-else ifeq ($(CTM_CONFIG),mswin-viamacos) # ----- Microsoft Windows, cross-compiled from my Mac. -----
-
-  GCCPFX:=i386-mingw32-
-  
-  SDLC:=$(shell /usr/local/i386-mingw32-4.3.0/i386-mingw32/bin/sdl-config --cflags)
-  SDLLD:=$(shell /usr/local/i386-mingw32-4.3.0/i386-mingw32/bin/sdl-config --libs)
-
-  CC:=$(GCCPFX)gcc -c -MMD -O2 -Isrc -Werror -Wimplicit -Wformat -DCTM_ARCH=CTM_ARCH_mswin $(SDLC)
-  LD:=$(GCCPFX)gcc 
-  LDPOST:=$(SDLLD) -lglew32s -lopengl32 -lzlib1 -lm -lpthreadGC2
-
-  OPT:=sdl
-  
-  APPSFX:=.exe
-  POSTRUN:=& etc/tool/watchstdio
-  PRERUN:=wine
-
-  CC+=-DGLSLVERSION=120
-
-else
-  $(error Unexpected value '$(CTM_CONFIG)' for CTM_CONFIG)
-endif
+include etc/make/$(CTM_CONFIG).mk
 
 #------------------------------------------------------------------------------
 # Generated source files.
