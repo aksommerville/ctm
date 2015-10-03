@@ -31,7 +31,10 @@ static GLuint ctm_shader_compile_1(struct ctm_shader *shader,GLuint type,const c
   GLuint lenv[2]={versionc,srcc};
 
   GLuint id=glCreateShader(type);
-  if (!id) return 0;
+  if (!id) {
+    printf("glCreateShader() failed\n");
+    return 0;
+  }
   glShaderSource(id,2,srcv,lenv);
   glCompileShader(id);
 
