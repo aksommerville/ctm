@@ -85,7 +85,7 @@ int ctm_sdl_init(int fullscreen) {
     SDL_WM_SetIcon(ctm_sdl.icon,0);
   }
   #if CTM_ARCH==CTM_ARCH_mswin //XXX For the time being, Windows fullscreen never works. (but I'm only testing it through WINE).
-    fullscreen=0;
+    fullscreen=1;
   #endif
 
   ctm_sdl.videoinit=1;
