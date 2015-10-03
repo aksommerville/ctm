@@ -7,7 +7,7 @@ SDLLD:=$(patsubst -R%,-L%,$(shell sdl-config --static-libs))
 
 CC:=gcc -c -MMD -O2 -Isrc -Werror -Wimplicit -Wformat -Wno-parentheses -Wno-pointer-sign -DCTM_ARCH=CTM_ARCH_macos $(SDLC)
 LD:=gcc $(SDLLD)
-LDPOST:=-lz -lm -lGL
+LDPOST:=-lz -lm -framework OpenGL
 
 CC+=-DGLSLVERSION=120
 
