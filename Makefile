@@ -77,12 +77,12 @@ else ifeq ($(CTM_CONFIG),linux-sdl) # ----- Desktop Linux with SDL (much more po
 
 else ifeq ($(CTM_CONFIG),macos) # ----- MacOS X with SDL (default) ----- 
 
-  SDLC:=$(shell sdl-config --cflags)
-  SDLLD:=$(patsubst -R%,-L%,$(shell sdl-config --static-libs))
+  SDLC:=$(shell ./sdl-config --cflags)
+  SDLLD:=$(patsubst -R%,-L%,$(shell ./sdl-config --static-libs))
 
   CC:=gcc -c -MMD -O2 -Isrc -Werror -Wimplicit -Wformat -Wno-parentheses -Wno-pointer-sign -DCTM_ARCH=CTM_ARCH_macos $(SDLC)
   LD:=gcc $(SDLLD)
-  LDPOST:=-lz -lm -lGL
+  LDPOST:=-lz -lm /usr/X11/lib/libGL.1.dylib
 
   CC+=-DGLSLVERSION=120
 

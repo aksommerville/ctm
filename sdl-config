@@ -1,0 +1,6 @@
+#!/bin/sh
+if [ "$1" = --cflags ] ; then
+  echo "-I/Library/Frameworks/SDL.framework/Headers"
+else
+  echo "-framework SDL -L/usr/X11/lib -lSDLMain -framework Cocoa"
+fi
