@@ -71,6 +71,8 @@ int ctm_sdl_init(int fullscreen) {
   if (ctm_sdl.videoinit) return -1;
   if (SDL_InitSubSystem(SDL_INIT_VIDEO)) return -1;
 
+  SDL_GL_SetAttribute(SDL_GL_SWAP_CONTROL,1);
+
   SDL_WM_SetCaption("The Campaign Trail of the Mummy","The Campaign Trail of the Mummy");
   if (ctm_sdl.icon=SDL_CreateRGBSurfaceFrom(
     (void*)ctm_program_icon,ctm_program_icon_w,ctm_program_icon_h,32,ctm_program_icon_w<<2,
@@ -112,17 +114,19 @@ int ctm_sdl_init(int fullscreen) {
   }
   ctm_screenw=ctm_sdl.screen->w;
   ctm_screenh=ctm_sdl.screen->h;
+
+  SDL_GL_SetAttribute(SDL_GL_SWAP_CONTROL,1);
   
   SDL_ShowCursor(0);
   
-  #if CTM_ARCH==CTM_ARCH_mswin && 0
+  #if CTM_ARCH==CTM_ARCH_mswin
     glewInit();
     if (!glewIsSupported("GL_VERSION_2_0")) {
       fprintf(stderr,"ctm: OpenGL 2.x or greater required.\n");
       return -1;
     }
   #endif
-  
+
   return 0;
 }
 
@@ -244,6 +248,10 @@ static int ctm_sdl_welcome_joystick(SDL_Joystick *sdljoy,const char *name,int sd
   if (joy->axisc&&!(joy->axisv=calloc(2,joy->axisc))) { ctm_joystick_del(joy); return -1; }
   if (joy->hatc&&!(joy->hatv=calloc(1,joy->hatc))) { ctm_joystick_del(joy); return -1; }
 
+  printf("    btnc %d\n",joy->btnc);
+  printf("    axisc %d\n",joy->axisc);
+  printf("    hatc %d\n",joy->hatc);
+
   if (joy->def=ctm_input_get_definition(joy->name,joy->namec)) {
     if (ctm_joystick_setup_map(joy)<0) return -1;
   } else {
@@ -335,14 +343,17 @@ int ctm_sdl_init_input() {
     if (ctm_sdl_add_keymap(SDLK_c,CTM_BTNID_TERTIARY)<0) return -1;
     if (ctm_sdl_add_keymap(SDLK_RETURN,CTM_BTNID_PAUSE)<0) return -1;
   }
-  
+
+  printf("Initializing joysticks...\n");
   if (SDL_InitSubSystem(SDL_INIT_JOYSTICK)) return -1;
   ctm_sdl.inputinit=1;
   int joyc=SDL_NumJoysticks();
+  printf("...detected %d joystick%s\n",joyc,(joyc==1)?"":"s");
   if (joyc>0) {
     int i; for (i=0;i<joyc;i++) {
       const char *joyname=SDL_JoystickName(i);
       if (!joyname) joyname="(Joystick)";
+      printf("  [%d] %s\n",i,joyname);
       SDL_Joystick *sdljoy=SDL_JoystickOpen(i);
       if (sdljoy) {
         if (ctm_sdl_welcome_joystick(sdljoy,joyname,i)<0) return -1;
@@ -419,7 +430,7 @@ void ctm_sdl_quit_audio() {
 
 /* Swap framebuffer.
  */
-
+ 
 int ctm_sdl_swap() {
   SDL_GL_SwapBuffers();
   return 0;

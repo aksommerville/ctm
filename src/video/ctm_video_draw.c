@@ -2,6 +2,25 @@
 #include <stdarg.h>
 #include <math.h>
 
+#if CTM_TEST_DISABLE_VIDEO
+  int ctm_draw_rect(int x,int y,int w,int h,uint32_t rgba) { return 0; }
+  int ctm_draw_frame(int x,int y,int w,int h,uint32_t rgba) { return 0; }
+  int ctm_draw_pointer(int x,int y) { return 0; }
+  int ctm_draw_texture(int x,int y,int w,int h,int texid,int upsidedown) { return 0; }
+  int ctm_draw_texture_flop(int x,int y,int w,int h,int texid,int upsidedown) { return 0; }
+  int ctm_video_begin_tiles() { return 0; }
+  int ctm_video_end_tiles(GLuint texid) { ctm_video.vtxc=0; return 0; }
+  int ctm_video_begin_sprites() { return 0; }
+  int ctm_video_end_sprites(GLuint texid) { ctm_video.vtxc=0; return 0; }
+  struct ctm_vertex_sprite *ctm_add_sprites(int c) { return ctm_video_vtxv_append(&ctm_shader_sprite,c); }
+  int ctm_video_begin_text(int size) { return 0; }
+  int ctm_video_end_text(GLuint texid) { return 0; }
+  int ctm_video_add_text(const char *src,int srcc,int x,int y,uint32_t rgba) { return 0; }
+  int ctm_video_add_textf(int x,int y,uint32_t rgba,const char *fmt,...) { return 0; }
+  int ctm_video_add_textf_centered(int x,int y,int w,int h,uint32_t rgba,const char *fmt,...) { return 0; }
+  int ctm_draw_pie(int x,int y,int radius,double startt,double stopt,uint32_t rgba) { return 0; }
+#else
+
 /* Draw simple rectangle.
  */
 
@@ -312,3 +331,5 @@ int ctm_draw_pie(int x,int y,int radius,double startt,double stopt,uint32_t rgba
   ctm_video.vtxc=0;
   return 0;
 }
+
+#endif

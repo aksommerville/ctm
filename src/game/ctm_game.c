@@ -120,7 +120,9 @@ static int ctm_game_update_play() {
     struct ctm_sprite_player *player=(struct ctm_sprite_player*)(ctm_group_player.sprv[i]);
     if (!player->wants_termination) { terminate=0; break; }
   }
-  if (terminate) return ctm_game_vote();
+  if (terminate) {
+    return ctm_game_vote();
+  }
 
   /* Update stats periodically. */
   if (--(ctm_game.statstrigger)<=0) {

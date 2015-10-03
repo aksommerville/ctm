@@ -5,9 +5,14 @@ if len(sys.argv)!=3:
   sys.stderr.write("Usage: %s INPUT OUTPUT\n"%(sys.argv[0]))
   sys.exit(1)
 
+try:
+  is_python_3=(sys.version_info[0]>=3)
+except:
+  is_python_3=False
+
 varname=os.path.basename(sys.argv[2]).split('.')[0]
 
-src=open(sys.argv[1],'r').read()
+src=open(sys.argv[1],'rb').read()
 pixelc=len(src)/4
 w=int(math.sqrt(pixelc))
 h=pixelc/w
@@ -18,7 +23,10 @@ if w*h*4!=len(src):
 dst="const unsigned char %s[]={\n"%(varname)
 linelen=0
 for ch in src:
-  dst+="0x%02x,"%(ord(ch))
+  if is_python_3:
+    dst+="0x%02x,"%(ch)
+  else:
+    dst+="0x%02x,"%(ord(ch))
   linelen+=5
   if linelen>=100:
     dst+="\n"

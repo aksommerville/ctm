@@ -170,6 +170,10 @@ int main(int argc,char **argv) {
   int err=0,framec=0;
   int64_t starttime=0,endtime=0;
 
+  #if CTM_TEST_DISABLE_VIDEO
+    printf("!!! Video is intentionally disabled in this build. DO NOT RELEASE. !!!\n");
+  #endif
+
   // argv
   int fullscreen=1;
   int audio=1;

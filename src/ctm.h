@@ -15,6 +15,14 @@
 #define CTM_ARCH_macos 3
 #define CTM_ARCH_mswin 4
 
+/* Andy uses this on his Windows box when needed to run audio or input tests.
+ * Nonzero will forcibly disable OpenGL 2.x, which effectively means no video at all.
+ */
+#define CTM_TEST_DISABLE_VIDEO 0
+#if CTM_TEST_DISABLE_VIDEO
+  #pragma message("CTM_TEST_DISABLE_VIDEO enabled; all video output will be suppressed.")
+#endif
+
 #if CTM_ARCH==CTM_ARCH_linux
   #define CTM_ARCH_NAME "Linux"
   #include <endian.h>
@@ -32,6 +40,12 @@
   #define LITTLE_ENDIAN 1234
   #define BIG_ENDIAN    4321
   #define BYTE_ORDER LITTLE_ENDIAN
+
+  // Fucking SDL redirects our output to a text file for some reason.
+  // Adding fflush() after every printf() helps ensure that the text is preserved even after a crash.
+  // This being Windows, we do need to be ready to crash. :)
+  #define printf(fmt,...) ({ printf(fmt,##__VA_ARGS__); fflush(stdout); })
+  #define fprintf(f,fmt,...) ({ fprintf(f,fmt,##__VA_ARGS__); fflush(f); })
   
 #else
   #error "Illegal value for CTM_ARCH."
