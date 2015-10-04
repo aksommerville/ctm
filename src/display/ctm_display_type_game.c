@@ -459,8 +459,10 @@ static int ctm_display_game_draw_final_stats(struct ctm_display *display,struct 
   if (ctm_video_begin_text(CTM_RESIZE(16))<0) return -1;
   if (ctm_video_add_textf_centered(0,y,display->fbw,CTM_RESIZE(16),0xffffff00|fgalpha,"        Deaths: %-4d",SPR->deaths)<0) return -1; 
   y+=CTM_RESIZE(16);
-  if (ctm_video_add_textf_centered(0,y,display->fbw,CTM_RESIZE(16),0xffffff00|fgalpha,"Mummies killed: %-4d",SPR->mummykills)<0) return -1; 
-  y+=CTM_RESIZE(16);
+  if (ctm_game.playerc>1) {
+    if (ctm_video_add_textf_centered(0,y,display->fbw,CTM_RESIZE(16),0xffffff00|fgalpha,"Mummies killed: %-4d",SPR->mummykills)<0) return -1; 
+    y+=CTM_RESIZE(16);
+  }
   if (ctm_video_add_textf_centered(0,y,display->fbw,CTM_RESIZE(16),0xffffff00|fgalpha," Bosses killed: %-4d",SPR->bosskills)<0) return -1;
   y+=CTM_RESIZE(16);
   if (ctm_video_add_textf_centered(0,y,display->fbw,CTM_RESIZE(16),0xffffff00|fgalpha," Voters killed: %-4d",SPR->voterkills)<0) return -1; 
