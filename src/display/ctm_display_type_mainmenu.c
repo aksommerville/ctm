@@ -321,14 +321,10 @@ int ctm_display_mainmenu_get_phase(const struct ctm_display *display) {
   return DISPLAY->phase;
 }
 
-// XXX Disabling population control. Confirm that it works, and this is what we want.
-// To reenable, just uncomment the two lines below and delete the two redundant lines.
-
 int ctm_display_mainmenu_advance(struct ctm_display *display) {
   if (!display||(display->type!=&ctm_display_type_mainmenu)) return -1;
   switch (DISPLAY->phase) {
     case CTM_MAINMENU_PHASE_PLAYERC: DISPLAY->phase=CTM_MAINMENU_PHASE_TIMELIMIT; return 1;
-    //case CTM_MAINMENU_PHASE_TIMELIMIT: DISPLAY->phase=CTM_MAINMENU_PHASE_POPULATION; return 1;
     case CTM_MAINMENU_PHASE_TIMELIMIT:
     case CTM_MAINMENU_PHASE_POPULATION: if (DISPLAY->bluec&&DISPLAY->redc) { // competitive
         return 0;
@@ -347,7 +343,6 @@ int ctm_display_mainmenu_retreat(struct ctm_display *display) {
     case CTM_MAINMENU_PHASE_PLAYERC: return 0;
     case CTM_MAINMENU_PHASE_TIMELIMIT: DISPLAY->phase=CTM_MAINMENU_PHASE_PLAYERC; return 1;
     case CTM_MAINMENU_PHASE_POPULATION: DISPLAY->phase=CTM_MAINMENU_PHASE_TIMELIMIT; return 1;
-    //case CTM_MAINMENU_PHASE_DIFFICULTY: DISPLAY->phase=CTM_MAINMENU_PHASE_POPULATION; return 1;
     case CTM_MAINMENU_PHASE_DIFFICULTY: DISPLAY->phase=CTM_MAINMENU_PHASE_TIMELIMIT; return 1;
   }
   return -1;

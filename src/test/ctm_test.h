@@ -52,4 +52,14 @@ void ctm_quit();
   } \
 }
 
+#define CTM_ASSERT_INTS(a,b,fmt,...) { \
+  int _a=(a),_b=(b); \
+  if (_a!=_b) { \
+    CTM_FAIL_BEGIN(fmt,##__VA_ARGS__) \
+    CTM_FAIL_MORE("As written","%s == %s",#a,#b) \
+    CTM_FAIL_MORE("Values","%d == %d",_a,_b) \
+    CTM_FAIL_END \
+  } \
+}
+
 #endif

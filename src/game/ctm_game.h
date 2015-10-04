@@ -22,7 +22,6 @@ struct ctm_werewolf_event {
 extern struct ctm_game {
 
   int playerc;
-  int beastc; // Preferred beast count; calculated from player count.
 
   int clock_running; // Nonzero until clock expires.
   int64_t starttime,endtime;

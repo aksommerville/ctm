@@ -2,6 +2,7 @@
 #include "ctm_game.h"
 #include "ctm_grid.h"
 #include "ctm_geography.h"
+#include "ctm_spawner.h"
 #include "sprite/ctm_sprite.h"
 #include "sprite/types/ctm_sprtype_voter.h"
 #include "sprite/types/ctm_sprtype_player.h"
@@ -18,10 +19,6 @@
 #define CTM_STATE_PREDICTION_TIME 120 // Frames, how often to update state predictions, when a menu is open.
 #define CTM_NEWS_MODAL_TIME 40 // Frames
 #define CTM_NEWS_AUTODISMISS_TIME 600 // Frames
-
-// If we don't have so many beasts afield, create one. (each frame).
-#define CTM_BEAST_PREFERRED_LEVEL 4
-#define CTM_BEASTS_PER_PLAYER 4
 
 // How long after game-over before users allowed to return to main menu?
 // A decent interval is helpful here, becuase the game could end unexpectedly while a player is pressing buttons.
@@ -53,6 +50,8 @@ void ctm_game_quit() {
   if (ctm_game.result) free(ctm_game.result);
   if (ctm_game.werewolf_eventv) free(ctm_game.werewolf_eventv);
   memset(&ctm_game,0,sizeof(struct ctm_game));
+
+  ctm_spawner_quit();
 }
 
 /* Finish game -- conduct election, choose a winner, yadda yadda.
@@ -181,10 +180,8 @@ static int ctm_game_update_play() {
     }
   }
 
-  /* Replenish our beast supply, if we're low. */
-  if (ctm_group_beast.sprc<ctm_game.beastc) {
-    if (ctm_sprite_spawn_beast()<0) return -1;
-  }
+  /* Replenish our beast supply, drop unused beasts, etc. */
+  if (ctm_spawner_update()<0) return -1;
 
   /* Update any sprites that need it. */
   if (ctm_sprgrp_copy(&ctm_group_altupdate,&ctm_group_update)<0) return -1;
@@ -697,9 +694,11 @@ int ctm_game_reset(int timelimit_minutes,int playerc_blue,int playerc_red,int po
   ctm_game.play_framec=0;
   ctm_game.phase=CTM_GAME_PHASE_PLAY;
   ctm_game.exitok=0;
-  ctm_game.beastc=CTM_BEAST_PREFERRED_LEVEL+CTM_BEASTS_PER_PLAYER*playerc;
   ctm_game.difficulty=difficulty;
   ctm_game.population=population;
+
+  /* Reset spawner. */
+  if (ctm_spawner_reset()<0) return -1;
 
   /* If all players belong to the same party, prepare the Werewolf's agenda. */
   if (!ctm_game.bluec||!ctm_game.redc) {

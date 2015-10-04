@@ -20,7 +20,6 @@ struct ctm_sprite_beast {
   int delay;
   int linger;
   int grabbed;
-  int ttl; // Counts down while candidate for deletion (due to nobody nearby).
 };
 
 #define SPR ((struct ctm_sprite_beast*)spr)
@@ -44,40 +43,6 @@ static int _ctm_beast_update(struct ctm_sprite *spr) {
 
   if (SPR->grabbed) return 0;
 
-  /* If too far off screen, terminate.
-   * Also, note the nearest living player. Move towards him most of the time.
-   */
-  int closeenough=0,i;
-  int inclinex=0,incliney=0;
-  for (i=0;i<ctm_group_player.sprc;i++) {
-    struct ctm_sprite *player=ctm_group_player.sprv[i];
-    if (player->interior!=spr->interior) continue;
-    if (player->type!=&ctm_sprtype_player) continue;
-    int dx=player->x-spr->x;
-    int dy=player->y-spr->y;
-    int distance=((dx<0)?-dx:dx)+((dy<0)?-dy:dy);
-    if (((struct ctm_sprite_player*)player)->hp) { // Living! Potentially incline towards this one.
-      if (distance<CTM_BEAST_TERMINAL_DISTANCE) { 
-        closeenough=1;
-        if (distance<CTM_BEAST_NO_INCLINATION_DISTANCE) inclinex=incliney=0;
-        else {
-          int adx=(dx<0)?-dx:dx,ady=(dy<0)?-dy:dy;
-          if (adx>ady) { inclinex=(dx>0)?1:-1; incliney=0; }
-          else { incliney=(dy>0)?1:-1; inclinex=0; }
-        }
-      }
-    } else { // Dead! Still call it "closeenough", but don't incline towards it.
-      if (distance<CTM_BEAST_TERMINAL_DISTANCE) {
-        closeenough=1;
-      }
-    }
-  }
-  if (!closeenough) {
-    if (--(SPR->ttl)<=0) return ctm_sprite_kill_later(spr);
-  } else {
-    SPR->ttl=CTM_BEAST_TTL;
-  }
-
   /* Walk around. */
   if (SPR->delay>0) {
     SPR->delay--;
@@ -96,10 +61,7 @@ static int _ctm_beast_update(struct ctm_sprite *spr) {
       }
     }
   } else {
-    if ((inclinex||incliney)&&(rand()%3)) { // usually follow our inclination (towards player)
-      SPR->dx=inclinex;
-      SPR->dy=incliney;
-    } else switch (rand()&3) {
+    switch (rand()&3) {
       case 0: SPR->dx=-1; break;
       case 1: SPR->dx=1; break;
       case 2: SPR->dy=-1; break;
@@ -140,76 +102,35 @@ const struct ctm_sprtype ctm_sprtype_beast={
   .grab=_ctm_beast_grab,
 };
 
-/* Spawn.
+/* Summon a new beast.
  */
+ 
+struct ctm_sprite *ctm_sprite_beast_summon(int x,int y,int interior) {
 
-int ctm_sprite_spawn_beast() {
-
-  // Pick a player at random. No players? No beast.
-  // We also reject players hiding out inside.
-  // No big deal to skip a beast-spawn iteration.
-  struct ctm_sprite *player=ctm_get_random_living_player_sprite();
-  if (!player) return 0;
-  if (player->interior) return 0;
-  struct ctm_sprite_player *PLAYER=(struct ctm_sprite_player*)player;
-
-  // Pick a random location within about half a screen's width of the player.
-  int screenw=0,screenh=0;
-  if (ctm_display_player_get_size(&screenw,&screenh,PLAYER->playerid)<1) return 0;
-  if ((screenw<1)||(screenh<1)) return 0;
-  int screencolc=screenw/CTM_TILESIZE; if (screencolc<2) screencolc=2; int screencolc2=screencolc>>1;
-  int screenrowc=screenh/CTM_TILESIZE; if (screenrowc<2) screenrowc=2; int screenrowc2=screenrowc>>1;
-  int col=player->x/CTM_TILESIZE,row=player->y/CTM_TILESIZE;
-  int xp,yp,xc,yc;
-  switch (rand()&7) {
-    case 0: xp=col-screencolc; yp=row-screenrowc; xc=screencolc2; yc=screenrowc2; break;
-    case 1: xp=col-screencolc2; yp=row-screenrowc; xc=screencolc; yc=screenrowc2; break;
-    case 2: xp=col+screencolc2; yp=row-screenrowc; xc=screencolc2; yc=screenrowc2; break;
-    case 3: xp=col-screencolc; yp=row-screenrowc2; xc=screencolc2; yc=screenrowc; break;
-    case 4: xp=col+screencolc2; yp=row-screenrowc2; xc=screencolc2; yc=screenrowc; break;
-    case 5: xp=col-screencolc; yp=row+screenrowc2; xc=screencolc2; yc=screenrowc2; break;
-    case 6: xp=col-screencolc2; yp=row+screenrowc2; xc=screencolc; yc=screenrowc2; break;
-    case 7: xp=col+screencolc2; yp=row+screenrowc2; xc=screencolc2; yc=screenrowc2; break;
-  }
-  col=xp+rand()%xc;
-  row=yp+rand()%yc;
-  int x=col*CTM_TILESIZE+(CTM_TILESIZE>>1);
-  int y=row*CTM_TILESIZE+(CTM_TILESIZE>>1);
-
-  // If this location is out of bounds, blocked, or within sight of any player, forget about it.
-  if ((x<0)||(y<0)||(col>=ctm_grid.colc)||(row>=ctm_grid.rowc)) return 0;
-  uint8_t tile=ctm_grid.cellv[row*ctm_grid.colc+col].tile;
-  uint32_t prop=ctm_tileprop_exterior[tile];
-  if (prop) return 0;
-  int i; for (i=0;i<ctm_group_player.sprc;i++) {
-    // This test assumes that all player displays are the same size, which at least for now is true enough.
-    struct ctm_sprite *qspr=ctm_group_player.sprv[i];
-    int dx=x-qspr->x;
-    if (dx<-(screenw>>1)-CTM_TILESIZE) continue;
-    if (dx>(screenw>>1)+CTM_TILESIZE) continue;
-    int dy=y-qspr->y;
-    if (dy<-(screenh>>1)-CTM_TILESIZE) continue;
-    if (dy>(screenh>>1)+CTM_TILESIZE) continue;
-    return 0;
-  }
-
-  // OK, let's summon the beast.
+  // Create sprite object.
   struct ctm_sprite *spr=ctm_sprite_alloc(&ctm_sprtype_beast);
-  if (!spr) return -1;
-  if (ctm_sprite_add_group(spr,&ctm_group_keepalive)<0) { ctm_sprite_del(spr); return -1; }
+  if (!spr) return 0;
+  if (ctm_sprite_add_group(spr,&ctm_group_keepalive)<0) { ctm_sprite_del(spr); return 0; }
   ctm_sprite_del(spr);
-  if (ctm_sprite_add_group(spr,&ctm_group_update)<0) return -1;
-  if (ctm_sprite_add_group(spr,&ctm_group_fragile)<0) return -1;
-  if (ctm_sprite_add_group(spr,&ctm_group_exterior)<0) return -1;
-  if (ctm_sprite_add_group(spr,&ctm_group_beast)<0) return -1;
-  if (ctm_sprite_add_group(spr,&ctm_group_hazard)<0) return -1;
-  if (ctm_sprite_add_group(spr,&ctm_group_hookable)<0) return -1;
-  if (ctm_sprite_add_group(spr,&ctm_group_bonkable)<0) return -1;
+
+  // Add to groups.
+  if (ctm_sprite_add_group(spr,&ctm_group_update)<0) return 0;
+  if (ctm_sprite_add_group(spr,&ctm_group_fragile)<0) return 0;
+  if (interior) {
+    if (ctm_sprite_add_group(spr,&ctm_group_interior)<0) return 0;
+  } else {
+    if (ctm_sprite_add_group(spr,&ctm_group_exterior)<0) return 0;
+  }
+  if (ctm_sprite_add_group(spr,&ctm_group_beast)<0) return 0;
+  if (ctm_sprite_add_group(spr,&ctm_group_hazard)<0) return 0;
+  if (ctm_sprite_add_group(spr,&ctm_group_hookable)<0) return 0;
+  if (ctm_sprite_add_group(spr,&ctm_group_bonkable)<0) return 0;
   spr->x=x;
   spr->y=y;
 
   // There are three universal species (kitten, raccoon, owl), and one local variety for each state.
   // Beast's tile is 0x16 + 16*state.
+  int col=x/CTM_TILESIZE,row=y/CTM_TILESIZE;
   _try_again_: switch (rand()&3) {
     case 0: {
         int stateix=((row*3)/ctm_grid.rowc)*3+((col*3)/ctm_grid.colc);
@@ -220,6 +141,6 @@ int ctm_sprite_spawn_beast() {
     case 2: spr->tile=0xb6; break;
     case 3: spr->tile=0xc6; break;
   }
-
-  return 1;
+  
+  return spr;
 }

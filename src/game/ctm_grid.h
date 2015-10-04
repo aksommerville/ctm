@@ -79,4 +79,23 @@ uint32_t ctm_grid_tileprop_for_rect(int x,int y,int w,int h,int interior); // Al
 
 int ctm_grid_nearest_fountain(int *fountainx,int *fountainy,int qx,int qy);
 
+/* Return a number halfway between multiples of CTM_TILESIZE.
+ * "up" and "down" always move in that direction; the regular function goes to the nearest.
+ * We will break in the presence of negative inputs.
+ */
+static inline int ctm_grid_round_to_cell_midpoint(int n) {
+  int offset=(n-(CTM_TILESIZE>>1))%CTM_TILESIZE;
+  if (offset<(CTM_TILESIZE>>1)) {
+    return n-offset;
+  } else {
+    return n-offset+CTM_TILESIZE;
+  }
+}
+static inline int ctm_grid_round_down_to_cell_midpoint(int n) {
+  return ((n-(CTM_TILESIZE>>1))/CTM_TILESIZE)*CTM_TILESIZE+(CTM_TILESIZE>>1);
+}
+static inline int ctm_grid_round_up_to_cell_midpoint(int n) {
+  return ((n-(CTM_TILESIZE>>1)-1)/CTM_TILESIZE+1)*CTM_TILESIZE+(CTM_TILESIZE>>1);
+}
+
 #endif
