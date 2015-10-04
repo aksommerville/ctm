@@ -123,6 +123,9 @@ int ctm_sprgrp_copy(struct ctm_sprgrp *dst,struct ctm_sprgrp *src);
 // If not NULL, always a sprite of type 'player'.
 struct ctm_sprite *ctm_sprite_for_player(int playerid);
 
+// Any player, as long as it's alive. If all dead, returns NULL.
+struct ctm_sprite *ctm_get_random_living_player_sprite();
+
 int ctm_sprgrp_semisort(struct ctm_sprgrp *grp);
 
 /* Type.

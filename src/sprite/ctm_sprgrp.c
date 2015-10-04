@@ -340,3 +340,27 @@ int ctm_sprgrp_semisort(struct ctm_sprgrp *grp) {
   grp->sortd*=-1;
   return 0;
 }
+
+/* Find a random living player sprite.
+ */
+ 
+struct ctm_sprite *ctm_get_random_living_player_sprite() {
+  int playerc=0;
+  int i; for (i=0;i<ctm_group_player.sprc;i++) {
+    struct ctm_sprite *spr=ctm_group_player.sprv[i];
+    if (!spr||(spr->type!=&ctm_sprtype_player)) continue;
+    struct ctm_sprite_player *SPR=(struct ctm_sprite_player*)spr;
+    if (!SPR->hp) continue;
+    playerc++;
+  }
+  if (!playerc) return 0;
+  int playerix=rand()%playerc;
+  for (i=0;i<ctm_group_player.sprc;i++) {
+    struct ctm_sprite *spr=ctm_group_player.sprv[i];
+    if (!spr||(spr->type!=&ctm_sprtype_player)) continue;
+    struct ctm_sprite_player *SPR=(struct ctm_sprite_player*)spr;
+    if (!SPR->hp) continue;
+    if (!playerix--) return spr;
+  }
+  return 0;
+}

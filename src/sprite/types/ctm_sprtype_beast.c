@@ -45,23 +45,30 @@ static int _ctm_beast_update(struct ctm_sprite *spr) {
   if (SPR->grabbed) return 0;
 
   /* If too far off screen, terminate.
-   * Also, note the nearest player. Move towards him most of the time.
+   * Also, note the nearest living player. Move towards him most of the time.
    */
   int closeenough=0,i;
   int inclinex=0,incliney=0;
   for (i=0;i<ctm_group_player.sprc;i++) {
     struct ctm_sprite *player=ctm_group_player.sprv[i];
     if (player->interior!=spr->interior) continue;
+    if (player->type!=&ctm_sprtype_player) continue;
     int dx=player->x-spr->x;
     int dy=player->y-spr->y;
     int distance=((dx<0)?-dx:dx)+((dy<0)?-dy:dy);
-    if (distance<CTM_BEAST_TERMINAL_DISTANCE) { 
-      closeenough=1;
-      if (distance<CTM_BEAST_NO_INCLINATION_DISTANCE) inclinex=incliney=0;
-      else {
-        int adx=(dx<0)?-dx:dx,ady=(dy<0)?-dy:dy;
-        if (adx>ady) { inclinex=(dx>0)?1:-1; incliney=0; }
-        else { incliney=(dy>0)?1:-1; inclinex=0; }
+    if (((struct ctm_sprite_player*)player)->hp) { // Living! Potentially incline towards this one.
+      if (distance<CTM_BEAST_TERMINAL_DISTANCE) { 
+        closeenough=1;
+        if (distance<CTM_BEAST_NO_INCLINATION_DISTANCE) inclinex=incliney=0;
+        else {
+          int adx=(dx<0)?-dx:dx,ady=(dy<0)?-dy:dy;
+          if (adx>ady) { inclinex=(dx>0)?1:-1; incliney=0; }
+          else { incliney=(dy>0)?1:-1; inclinex=0; }
+        }
+      }
+    } else { // Dead! Still call it "closeenough", but don't incline towards it.
+      if (distance<CTM_BEAST_TERMINAL_DISTANCE) {
+        closeenough=1;
       }
     }
   }
@@ -139,10 +146,10 @@ const struct ctm_sprtype ctm_sprtype_beast={
 int ctm_sprite_spawn_beast() {
 
   // Pick a player at random. No players? No beast.
-  if (ctm_group_player.sprc<1) return 0;
-  int playerix=rand()%ctm_group_player.sprc;
-  struct ctm_sprite *player=ctm_group_player.sprv[playerix];
-  if (player->type!=&ctm_sprtype_player) return 0;
+  // We also reject players hiding out inside.
+  // No big deal to skip a beast-spawn iteration.
+  struct ctm_sprite *player=ctm_get_random_living_player_sprite();
+  if (!player) return 0;
   if (player->interior) return 0;
   struct ctm_sprite_player *PLAYER=(struct ctm_sprite_player*)player;
 
