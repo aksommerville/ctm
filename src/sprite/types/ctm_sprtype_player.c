@@ -183,6 +183,40 @@ int ctm_player_add_wanted(struct ctm_sprite *spr,int amount) {
   return 0;
 }
 
+/* Force position to the middle of the current cell.
+ */
+
+static int ctm_player_force_tile_alignment(struct ctm_sprite *spr) {
+  int x=spr->x/CTM_TILESIZE;
+  int y=spr->y/CTM_TILESIZE;
+  x=x*CTM_TILESIZE+(CTM_TILESIZE>>1);
+  y=y*CTM_TILESIZE+(CTM_TILESIZE>>1);
+  if ((x==spr->x)&&(y==spr->y)) {
+  } else {
+    spr->x=x;
+    spr->y=y;
+  }
+  return 0;
+}
+
+/* Toggle interior/exterior.
+ */
+
+static int ctm_player_toggle_door(struct ctm_sprite *spr) {
+  CTM_SFX(DOOR)
+  ctm_player_force_tile_alignment(spr);
+  if (spr->interior) {
+    if (ctm_sprite_add_group(spr,&ctm_group_exterior)<0) return -1;
+    if (ctm_sprite_remove_group(spr,&ctm_group_interior)<0) return -1;
+    spr->interior=0;
+  } else {
+    if (ctm_sprite_add_group(spr,&ctm_group_interior)<0) return -1;
+    if (ctm_sprite_remove_group(spr,&ctm_group_exterior)<0) return -1;
+    spr->interior=1;
+  }
+  return 0;
+}
+
 /* Moved to new cell.
  */
 
@@ -221,16 +255,7 @@ static int ctm_player_entering_cell(struct ctm_sprite *spr) {
 
   /* Toggle interior and exterior? */
   if (prop&CTM_TILEPROP_DOOR) {
-    CTM_SFX(DOOR)
-    if (spr->interior) {
-      if (ctm_sprite_add_group(spr,&ctm_group_exterior)<0) return -1;
-      if (ctm_sprite_remove_group(spr,&ctm_group_interior)<0) return -1;
-      spr->interior=0;
-    } else {
-      if (ctm_sprite_add_group(spr,&ctm_group_interior)<0) return -1;
-      if (ctm_sprite_remove_group(spr,&ctm_group_exterior)<0) return -1;
-      spr->interior=1;
-    }
+    if (ctm_player_toggle_door(spr)<0) return -1;
   }
   
   return 0;
@@ -274,6 +299,47 @@ static int ctm_player_test_collision(struct ctm_sprite *spr,const struct ctm_bou
   return 0;
 }
 
+/* Player is walking directly into a wall.
+ * If he is standing on a door, and the tile behind him is walkable, enter the door.
+ */
+
+static int ctm_player_check_wall_hitting_activity(struct ctm_sprite *spr) {
+
+  if ((SPR->poscol<0)||(SPR->poscol>=ctm_grid.colc)) return 0;
+  if ((SPR->posrow<0)||(SPR->posrow>=ctm_grid.rowc)) return 0;
+  uint8_t tile;
+  uint32_t prop;
+  if (spr->interior) {
+    tile=ctm_grid.cellv[SPR->posrow*ctm_grid.colc+SPR->poscol].itile;
+    prop=ctm_tileprop_interior[tile];
+  } else {
+    tile=ctm_grid.cellv[SPR->posrow*ctm_grid.colc+SPR->poscol].tile;
+    prop=ctm_tileprop_exterior[tile];
+  }
+
+  if (prop&CTM_TILEPROP_DOOR) {
+    const uint32_t solidmask=CTM_TILEPROP_SOLID;
+    uint32_t ckprop=solidmask;
+    if ((SPR->dy<0)&&(SPR->posrow<ctm_grid.rowc-1)) { // Check SOUTH
+      ckprop=ctm_grid_tileprop_for_cell(SPR->poscol,SPR->posrow+1,spr->interior);
+    } else if ((SPR->dy>0)&&(SPR->posrow>0)) { // Check NORTH
+      ckprop=ctm_grid_tileprop_for_cell(SPR->poscol,SPR->posrow-1,spr->interior);
+    }
+    if (ckprop&solidmask) { // Check horizontal doors. We don't actually have any, but let's be complete.
+      if ((SPR->dx<0)&&(SPR->poscol<ctm_grid.colc-1)) { // Check EAST
+        ckprop=ctm_grid_tileprop_for_cell(SPR->poscol+1,SPR->posrow,spr->interior);
+      } else if ((SPR->dx>0)&&(SPR->poscol>0)) { // Check WEST
+        ckprop=ctm_grid_tileprop_for_cell(SPR->poscol-1,SPR->posrow,spr->interior);
+      }
+    }
+    if (!(ckprop&solidmask)) {
+      if (ctm_player_toggle_door(spr)<0) return -1;
+    }
+  }
+  
+  return 0;
+}
+
 /* Move.
  */
 
@@ -285,7 +351,7 @@ int ctm_player_move(struct ctm_sprite *spr,int dx,int dy,int leap) {
     int rdy=ctm_player_move(spr,0,dy,leap); if (rdy<0) return -1;
     return rdx+rdy;
   }
-  if (!dx&&!dy) return 0;
+  if (!dx&&!dy) return ctm_player_check_wall_hitting_activity(spr);
 
   /* Get old and new physical boundaries.
    * Test the difference, and reenter if it collides with something.

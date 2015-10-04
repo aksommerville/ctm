@@ -344,16 +344,13 @@ int ctm_sdl_init_input() {
     if (ctm_sdl_add_keymap(SDLK_RETURN,CTM_BTNID_PAUSE)<0) return -1;
   }
 
-  printf("Initializing joysticks...\n");
   if (SDL_InitSubSystem(SDL_INIT_JOYSTICK)) return -1;
   ctm_sdl.inputinit=1;
   int joyc=SDL_NumJoysticks();
-  printf("...detected %d joystick%s\n",joyc,(joyc==1)?"":"s");
   if (joyc>0) {
     int i; for (i=0;i<joyc;i++) {
       const char *joyname=SDL_JoystickName(i);
       if (!joyname) joyname="(Joystick)";
-      printf("  [%d] %s\n",i,joyname);
       SDL_Joystick *sdljoy=SDL_JoystickOpen(i);
       if (sdljoy) {
         if (ctm_sdl_welcome_joystick(sdljoy,joyname,i)<0) return -1;

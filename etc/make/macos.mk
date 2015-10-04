@@ -14,4 +14,4 @@ CC+=-DGLSLVERSION=120
 OPT:=sdl
 
 APP:=CampaignTrailOfTheMummy.app/Contents/MacOS/CampaignTrailOfTheMummy
-POSTRUN:=--fullscreen=1
+POSTRUN:=--fullscreen=0
