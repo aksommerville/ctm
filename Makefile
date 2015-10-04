@@ -39,7 +39,6 @@ ifndef CTM_CONFIG
 endif
 
 APPSFX:=
-
 addl_app_req:
 
 include etc/make/$(CTM_CONFIG).mk

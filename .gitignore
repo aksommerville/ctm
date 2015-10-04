@@ -2,6 +2,7 @@ mid
 out
 bak
 pkg
+.DS_Store
 *~
 ~*
 
