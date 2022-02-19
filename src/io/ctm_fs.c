@@ -203,6 +203,16 @@ static const char *ctm_get_root_for_executable() {
     if (ctm_root_valid(path)) return ctm_root_path_keep(path);
   }
   
+  // Remove one more and append "ctm-data" -- this is the layout of my workspace.
+  // (it would normally also catch due to working directory, but we want to be able to launch from elsewhere).
+  while (srcc&&(src[srcc-1]==CTM_PATHSEP_CH)) srcc--;
+  while (srcc&&(src[srcc-1]!=CTM_PATHSEP_CH)) srcc--;
+  if (srcc&&(srcc<sizeof(path)-9)) {
+    memcpy(path,src,srcc);
+    memcpy(path+srcc,"ctm-data",9);
+    if (ctm_root_valid(path)) return ctm_root_path_keep(path);
+  }
+  
   return 0;
 }
 
