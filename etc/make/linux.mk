@@ -7,7 +7,7 @@ LDPOST:=-lz -lm -lasound -lX11 -lGL -lpthread -ldrm -lgbm -lEGL
 
 #TODO Make the ALSA device really configurable, in a config file or something.
 ifeq ($(shell uname -n),gigglebyte)
-  CC+=-DALSA_DEVICE='"hw:0,3"'
+  CC+=-DCTM_ALSA_DEVICE='"hw:0,3"'
 endif
 
 OPT:=glx alsa evdev drm
