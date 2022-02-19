@@ -5,6 +5,11 @@ CC:=gcc -c -MMD -O2 -Isrc -Werror -Wimplicit -Wformat -DCTM_ARCH=CTM_ARCH_linux 
 LD:=gcc
 LDPOST:=-lz -lm -lasound -lX11 -lGL -lpthread -ldrm -lgbm -lEGL
 
+#TODO Make the ALSA device really configurable, in a config file or something.
+ifeq ($(shell uname -n),gigglebyte)
+  CC+=-DALSA_DEVICE='"hw:0,3"'
+endif
+
 OPT:=glx alsa evdev drm
 
 CC+=-DGLSLVERSION=100

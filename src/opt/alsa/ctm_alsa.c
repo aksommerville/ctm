@@ -10,6 +10,10 @@
 // I find 2048 works, but haven't tested it under heavy load yet.
 #define CTM_ALSA_BUFFER_SIZE 2048
 
+#ifndef CTM_ALSA_DEVICE
+  #define CTM_ALSA_DEVICE "default"
+#endif
+
 /* Globals.
  */
 
@@ -20,6 +24,7 @@ static struct {
   snd_pcm_hw_params_t *hwparams;
 
   int rate;
+  int chanc;
   int hwbuffersize;
   int bufc; // frames
   int16_t *buf;
@@ -40,6 +45,16 @@ static void *ctm_alsa_iothd(void *dummy) {
     if (pthread_mutex_lock(&ctm_alsa.iomtx)) return 0;
     ctm_alsa.cb(ctm_alsa.buf,ctm_alsa.bufc);
     pthread_mutex_unlock(&ctm_alsa.iomtx);
+    
+    // expand to stereo
+    if (ctm_alsa.chanc==2) {
+      const int16_t *srcp=ctm_alsa.buf+ctm_alsa.bufc-1;
+      int16_t *dstp=ctm_alsa.buf+(ctm_alsa.bufc<<1)-2;
+      int i=ctm_alsa.bufc;
+      for (;i-->0;srcp-=1,dstp-=2) {
+        dstp[1]=dstp[0]=*srcp;
+      }
+    }
 
     // dump buffer to alsa
     int16_t *samplev=ctm_alsa.buf;
@@ -54,7 +69,7 @@ static void *ctm_alsa_iothd(void *dummy) {
         }
         break;
       }
-      samplep+=err;
+      samplep+=err*ctm_alsa.chanc;
     }
   }
   return 0;
@@ -69,23 +84,25 @@ int ctm_alsa_init(void (*cb)(int16_t *dst,int dstac)) {
   ctm_alsa.cb=cb;
 
   int rate=44100;
+  int chanc=2;
 
-  if (snd_pcm_open(&ctm_alsa.alsa,"default",SND_PCM_STREAM_PLAYBACK,0)<0) return -1;
+  if (snd_pcm_open(&ctm_alsa.alsa,CTM_ALSA_DEVICE,SND_PCM_STREAM_PLAYBACK,0)<0) return -1;
   if (snd_pcm_hw_params_malloc(&ctm_alsa.hwparams)<0) return -1;
   if (snd_pcm_hw_params_any(ctm_alsa.alsa,ctm_alsa.hwparams)<0) return -1;
   if (snd_pcm_hw_params_set_access(ctm_alsa.alsa,ctm_alsa.hwparams,SND_PCM_ACCESS_RW_INTERLEAVED)<0) return -1;
   if (snd_pcm_hw_params_set_format(ctm_alsa.alsa,ctm_alsa.hwparams,SND_PCM_FORMAT_S16)<0) return -1;
   if (snd_pcm_hw_params_set_rate_near(ctm_alsa.alsa,ctm_alsa.hwparams,&rate,0)<0) return -1;
-  if (snd_pcm_hw_params_set_channels(ctm_alsa.alsa,ctm_alsa.hwparams,1)<0) return -1;
+  if (snd_pcm_hw_params_set_channels_near(ctm_alsa.alsa,ctm_alsa.hwparams,&chanc)<0) return -1;
   if (snd_pcm_hw_params_set_buffer_size(ctm_alsa.alsa,ctm_alsa.hwparams,CTM_ALSA_BUFFER_SIZE)<0) return -1;
   if (snd_pcm_hw_params(ctm_alsa.alsa,ctm_alsa.hwparams)<0) return -1;
 
   if (snd_pcm_nonblock(ctm_alsa.alsa,0)<0) return -1;
   if (snd_pcm_prepare(ctm_alsa.alsa)<0) return -1;
   ctm_alsa.rate=rate;
-  ctm_alsa.bufc=CTM_ALSA_BUFFER_SIZE;
+  ctm_alsa.chanc=chanc;
+  ctm_alsa.bufc=CTM_ALSA_BUFFER_SIZE/chanc;
   ctm_alsa.cb=cb;
-  if (!(ctm_alsa.buf=malloc(4*ctm_alsa.bufc))) return -1;
+  if (!(ctm_alsa.buf=malloc(sizeof(int16_t)*ctm_alsa.chanc*ctm_alsa.bufc))) return -1;
 
   { pthread_mutexattr_t mattr;
     pthread_mutexattr_init(&mattr);
