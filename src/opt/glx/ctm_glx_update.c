@@ -97,7 +97,7 @@ static int ctm_glx_event(XEvent *evt) {
  
 int ctm_glx_update() {
   int err;
-  if (!ctm_glx.dpy) return -1;
+  if (!ctm_glx.dpy) return 0;
   int evtc=XEventsQueued(ctm_glx.dpy,QueuedAfterFlush);
   while (evtc-->0) {
     XEvent evt={0};

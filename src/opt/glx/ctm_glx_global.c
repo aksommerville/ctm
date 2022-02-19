@@ -171,6 +171,9 @@ static inline uint16_t ctm_glx_lookup_key(int keysym) {
 
 int ctm_glx_init_input() {
 
+  // Not running, no worries (we might be using DRM instead).
+  if (!ctm_glx.dpy) return 0;
+
   if ((ctm_glx.devid_keyboard=ctm_input_register_device())<1) return -1;
 
   struct ctm_input_definition *def=ctm_input_get_definition("X11 Keyboard",12);

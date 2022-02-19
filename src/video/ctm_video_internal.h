@@ -6,8 +6,14 @@
 
 #if CTM_USE_bcm
   #include "opt/bcm/ctm_bcm.h"
-#elif CTM_USE_glx
-  #include "opt/glx/ctm_glx.h"
+#elif CTM_USE_glx || CTM_USE_drm
+  // We can build with both GLX and DRM. Only one gets used, but we can pick at runtime.
+  #if CTM_USE_glx
+    #include "opt/glx/ctm_glx.h"
+  #endif
+  #if CTM_USE_drm
+    #include "opt/drm/ctm_drm.h"
+  #endif
 #elif CTM_USE_sdl
   #include "opt/sdl/ctm_sdl.h"
 #else
@@ -93,6 +99,10 @@ extern struct ctm_video {
   int sprites_upside_down_in_framebuffer;
 
   int textsize;
+  
+  #if CTM_USE_glx || CTM_USE_drm
+    char driver; // 'g' or 'd'
+  #endif
 
 } ctm_video;
 

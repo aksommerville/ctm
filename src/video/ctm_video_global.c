@@ -23,8 +23,11 @@ int ctm_video_init(int fullscreen) {
 
   #if CTM_USE_bcm
     if (ctm_bcm_init()<0) return -1;
-  #elif CTM_USE_glx
-    if (ctm_glx_init(fullscreen,640,480)<0) return -1;
+  #elif CTM_USE_glx || CTM_USE_drm
+    // Try GLX first, them DRM.
+    if (ctm_glx_init(fullscreen,640,480)>=0) ctm_video.driver='g';
+    else if (ctm_drm_init()>=0) ctm_video.driver='d';
+    else return -1;
   #elif CTM_USE_sdl
     if (ctm_sdl_init(fullscreen)<0) return -1;
   #endif
@@ -107,8 +110,9 @@ void ctm_video_quit() {
 
   #if CTM_USE_bcm
     ctm_bcm_quit();
-  #elif CTM_USE_glx
+  #elif CTM_USE_glx || CTM_USE_drm
     ctm_glx_quit();
+    ctm_drm_quit();
   #elif CTM_USE_sdl
     ctm_sdl_quit();
   #endif
@@ -125,8 +129,10 @@ void ctm_video_quit() {
 int ctm_video_swap() {
   #if CTM_USE_bcm
     return ctm_bcm_swap();
-  #elif CTM_USE_glx
-    return ctm_glx_swap();
+  #elif CTM_USE_glx || CTM_USE_drm
+    if (ctm_video.driver=='g') return ctm_glx_swap();
+    if (ctm_video.driver=='d') return ctm_drm_swap();
+    return -1;
   #elif CTM_USE_sdl
     return ctm_sdl_swap();
   #endif
@@ -138,8 +144,9 @@ int ctm_video_swap() {
 int ctm_video_get_fullscreen() {
   #if CTM_USE_bcm
     return 1;
-  #elif CTM_USE_glx
-    return ctm_glx_is_fullscreen();
+  #elif CTM_USE_glx || CTM_USE_drm
+    if (ctm_video.driver=='g') return ctm_glx_is_fullscreen();
+    return 1;
   #elif CTM_USE_sdl
     return ctm_sdl_is_fullscreen();
   #endif
@@ -148,8 +155,9 @@ int ctm_video_get_fullscreen() {
 int ctm_video_set_fullscreen(int fs) {
   #if CTM_USE_bcm
     return 1;
-  #elif CTM_USE_glx
-    return ctm_glx_set_fullscreen(fs);
+  #elif CTM_USE_glx || CTM_USE_drm
+    if (ctm_video.driver=='g') return ctm_glx_set_fullscreen(fs);
+    return 1;
   #elif CTM_USE_sdl
     return ctm_sdl_set_fullscreen(fs);
   #endif
