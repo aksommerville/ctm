@@ -105,19 +105,9 @@ static int ctm_display_modal_pack(struct ctm_display *display) {
 
 static int _ctm_display_modal_resized(struct ctm_display *display) {
 
-  /* Preserve aspect, ensure that we have at least 160x160, and try to keep it under 320x320.
-   * Don't think too hard about it.
-   */
-  int fbw=display->w;
-  int fbh=display->h;
-  int excessx=fbw/CTM_RESIZE(120);
-  int excessy=fbh/CTM_RESIZE(160);
-  int excess=(excessx>excessy)?excessx:excessy;
-  if (excess>1) {
-    excess--;
-    fbw/=excess;
-    fbh/=excess;
-  }
+  // This will break if there's ever a non-three count of buttons.
+  int fbw=CTM_TILESIZE*8;
+  int fbh=3*CTM_TILESIZE*3;
   
   if (ctm_display_resize_fb(display,fbw,fbh)<0) return -1;
   if (ctm_display_modal_pack(display)<0) return -1;
