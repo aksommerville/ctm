@@ -92,6 +92,7 @@ uint16_t ctm_input_device_state(int devid); // Devices track their own state ind
 #define CTM_BTNID_FULLSCREEN   0x8007 // Toggle fullscreen.
 #define CTM_BTNID_FULLSCREEN_1 0x8008 // One-way fullscreen.
 #define CTM_BTNID_FULLSCREEN_0 0x8009 // One-way exit fullscreen.
+#define CTM_BTNID_UNUSED       0x800a // Placeholder to nix a mapping
 
 const char *ctm_input_btnid_name(uint16_t btnid);
 

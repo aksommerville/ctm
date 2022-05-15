@@ -91,6 +91,9 @@ static int ctm_output_eval(uint16_t *dst,const char *src,int srcc) {
         _(PAUSE)
         _(RESET)
       } break;
+    case 6: {
+	_(UNUSED)
+      } break;
     case 7: {
         _(PRIMARY)
       } break;
