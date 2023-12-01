@@ -3,12 +3,8 @@
 /* Open device file.
  */
  
-int drm_open_file() {
-
-  //TODO we now may have a poller -- ctm_drm.delegate.poller. Register the file there, and don't poll on our own.
-
-  //TODO allow user to configure, somehow
-  const char *device_path="/dev/dri/card0";
+int drm_open_file(const char *device_path) {
+  if (!device_path||!device_path[0]) device_path="/dev/dri/card0";
   
   if ((ctm_drm.fd=open(device_path,O_RDWR))<0) {
     fprintf(stderr,"%s: %m\n",device_path);

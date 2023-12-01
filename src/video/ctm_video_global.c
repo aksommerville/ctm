@@ -17,7 +17,7 @@ int ctm_screenw=0,ctm_screenh=0;
 /* Init.
  */
 
-int ctm_video_init(int fullscreen) {
+int ctm_video_init(int fullscreen,const char *device) {
   memset(&ctm_video,0,sizeof(struct ctm_video));
   ctm_screenw=ctm_screenh=0;
 
@@ -26,7 +26,7 @@ int ctm_video_init(int fullscreen) {
   #elif CTM_USE_glx || CTM_USE_drm
     // Try GLX first, them DRM.
     if (ctm_glx_init(fullscreen,640,480)>=0) ctm_video.driver='g';
-    else if (ctm_drm_init()>=0) ctm_video.driver='d';
+    else if (ctm_drm_init(device)>=0) ctm_video.driver='d';
     else return -1;
   #elif CTM_USE_sdl
     if (ctm_sdl_init(fullscreen)<0) return -1;

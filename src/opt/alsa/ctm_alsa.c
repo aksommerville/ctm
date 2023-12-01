@@ -10,10 +10,6 @@
 // I find 2048 works, but haven't tested it under heavy load yet.
 #define CTM_ALSA_BUFFER_SIZE 2048
 
-#ifndef CTM_ALSA_DEVICE
-  #define CTM_ALSA_DEVICE "default"
-#endif
-
 /* Globals.
  */
 
@@ -78,15 +74,16 @@ static void *ctm_alsa_iothd(void *dummy) {
 /* Init.
  */
 
-int ctm_alsa_init(void (*cb)(int16_t *dst,int dstac)) {
+int ctm_alsa_init(void (*cb)(int16_t *dst,int dstac),const char *device) {
   if (!cb) return -1;
   memset(&ctm_alsa,0,sizeof(ctm_alsa));
   ctm_alsa.cb=cb;
 
   int rate=44100;
   int chanc=2;
+  if (!device||!device[0]) device="default";
 
-  if (snd_pcm_open(&ctm_alsa.alsa,CTM_ALSA_DEVICE,SND_PCM_STREAM_PLAYBACK,0)<0) return -1;
+  if (snd_pcm_open(&ctm_alsa.alsa,device,SND_PCM_STREAM_PLAYBACK,0)<0) return -1;
   if (snd_pcm_hw_params_malloc(&ctm_alsa.hwparams)<0) return -1;
   if (snd_pcm_hw_params_any(ctm_alsa.alsa,ctm_alsa.hwparams)<0) return -1;
   if (snd_pcm_hw_params_set_access(ctm_alsa.alsa,ctm_alsa.hwparams,SND_PCM_ACCESS_RW_INTERLEAVED)<0) return -1;

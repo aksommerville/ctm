@@ -13,7 +13,7 @@
 // Set by video backend (GLX, BCM, SDL). To others, is it read-only.
 extern int ctm_screenw,ctm_screenh;
 
-int ctm_video_init(int fullscreen);
+int ctm_video_init(int fullscreen,const char *device);
 void ctm_video_quit();
 int ctm_video_swap();
 

@@ -45,18 +45,18 @@ static void ctm_rcvsig(int sigid) {
 /* Init.
  */
 
-static int ctm_init(int fullscreen,int audio) {
+static int ctm_init(int fullscreen,int audio,const char *video_device,const char *audio_device) {
 
   signal(SIGINT,ctm_rcvsig);
   signal(SIGTERM,ctm_rcvsig);
   signal(SIGQUIT,ctm_rcvsig);
 
   /* Bring subsystems online. */
-  if (ctm_video_init(fullscreen)<0) return -1;
+  if (ctm_video_init(fullscreen,video_device)<0) return -1;
   if (ctm_poll_init()<0) return -1;
   if (ctm_input_init(0)<0) return -1;
   if (ctm_display_init()<0) return -1;
-  if (audio&&(ctm_audio_init())<0) return -1;
+  if (audio&&(ctm_audio_init(audio_device))<0) return -1;
 
   if (ctm_sprgrp_init()<0) return -1;
   if (ctm_grid_init()<0) return -1;
@@ -155,11 +155,13 @@ static void ctm_print_help(const char *name) {
   printf("Usage: %s [OPTIONS]\n",name);
   printf(
     "OPTIONS:\n"
-    "  --help             Print this message.\n"
-    "  --fullscreen=0|1   Start in fullscreen mode, if switchable.\n"
-    "  --audio=0|1        Enable or disable audio.\n"
+    "  --help               Print this message.\n"
+    "  --fullscreen=0|1     Start in fullscreen mode, if switchable.\n"
+    "  --audio=0|1          Enable or disable audio.\n"
+    "  --video-device=PATH  For DRM only.\n"
+    "  --audio-device=NAME  For ALSA only.\n"
     "ENVIRONMENT:\n"
-    "  CTM_ROOT=PATH      Path to directory containing all data files.\n"
+    "  CTM_ROOT=PATH        Path to directory containing all data files.\n"
   );
 }
 
@@ -177,12 +179,16 @@ int main(int argc,char **argv) {
   // argv
   int fullscreen=1;
   int audio=1;
+  const char *video_device=0;
+  const char *audio_device=0;
   if (argc>=1) {
     ctm_set_argv0(argv[0]);
     int i; for (i=1;i<argc;i++) {
       if (!memcmp(argv[i],"--fullscreen=",13)) fullscreen=ctm_eval_boolean(argv[i]+13,-1);
       else if (!memcmp(argv[i],"--audio=",8)) audio=ctm_eval_boolean(argv[i]+8,-1);
       else if (!strcmp(argv[i],"--help")) { ctm_print_help(argv[0]); return 0; }
+      else if (!memcmp(argv[i],"--video-device=",15)) video_device=argv[i]+15;
+      else if (!memcmp(argv[i],"--audio-device=",15)) audio_device=argv[i]+15;
       else {
         fprintf(stderr,"%s: Unexpected argument '%s'.\n",argv[0],argv[i]);
         return 1;
@@ -191,7 +197,7 @@ int main(int argc,char **argv) {
   }
 
   srand(time(0));
-  if ((err=ctm_init(fullscreen,audio))<0) goto _done_;
+  if ((err=ctm_init(fullscreen,audio,video_device,audio_device))<0) goto _done_;
 
   starttime=ctm_get_time();
 

@@ -43,7 +43,7 @@ static void ctm_audio_callback(int16_t *dst,int dstc) {
 /* Init.
  */
 
-int ctm_audio_init() {
+int ctm_audio_init(const char *device) {
   memset(&ctm_audio,0,sizeof(struct ctm_audio));
 
   #if CTM_AUDIO_DISABLE
@@ -62,7 +62,7 @@ int ctm_audio_init() {
     ctm_audio.enabled=1;
     if (ctm_audio_load_effects()<0) return -1;
     if (ctm_audio_load_songs()<0) return -1;
-    if (ctm_alsa_init(ctm_audio_callback)<0) return -1;
+    if (ctm_alsa_init(ctm_audio_callback,device)<0) return -1;
   #elif CTM_USE_sdl
     ctm_audio.enabled=1;
     if (ctm_audio_load_effects()<0) return -1;

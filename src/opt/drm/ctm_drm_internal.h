@@ -53,7 +53,7 @@ extern struct ctm_drm_driver {
   
 } ctm_drm;
 
-int drm_open_file();
+int drm_open_file(const char *device);
 int drm_configure();
 int drm_init_gx();
 
