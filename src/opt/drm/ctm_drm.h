@@ -6,7 +6,7 @@
 #define CTM_DRM_H
 
 void ctm_drm_quit();
-int ctm_drm_init();
+int ctm_drm_init(const char *device);
 int ctm_drm_swap();
 
 #endif

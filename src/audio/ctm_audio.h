@@ -14,7 +14,7 @@
 #ifndef CTM_AUDIO_H
 #define CTM_AUDIO_H
 
-int ctm_audio_init();
+int ctm_audio_init(const char *device);
 void ctm_audio_quit();
 int ctm_audio_update();
 

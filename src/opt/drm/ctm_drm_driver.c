@@ -49,7 +49,7 @@ void ctm_drm_quit() {
 /* Init.
  */
  
-int ctm_drm_init() {
+int ctm_drm_init(const char *device) {
 
   ctm_drm.fd=-1;
   ctm_drm.crtcunset=1;
@@ -60,7 +60,7 @@ int ctm_drm_init() {
   }
   
   if (
-    (drm_open_file()<0)||
+    (drm_open_file(device)<0)||
     (drm_configure()<0)||
     (drm_init_gx()<0)||
   0) return -1;
@@ -133,6 +133,7 @@ static int drm_swap_egl(uint32_t *fbid) {
     if (drmModeAddFB(ctm_drm.fd,width,height,24,32,stride,fb->handle,&fb->fbid)<0) return -1;
     
     if (ctm_drm.crtcunset) {
+      fprintf(stderr,"%s:%d fd=%d crtcid=%d fbid=%d\n",__FILE__,__LINE__,ctm_drm.fd,ctm_drm.crtcid,fb->fbid);
       if (drmModeSetCrtc(
         ctm_drm.fd,ctm_drm.crtcid,fb->fbid,0,0,
         &ctm_drm.connid,1,&ctm_drm.mode
